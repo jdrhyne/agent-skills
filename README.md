@@ -18,6 +18,9 @@ Skills include tooling, templates, scripts, or structured workflows:
 | Skill | Description |
 |-------|-------------|
 | `elegant-reports` | Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic via Nutrient DWS API. Includes templates, themes, and a Node.js generator. |
+| `ga4` | Query Google Analytics 4 (GA4) data via the Analytics Data API. Pull website analytics like top pages, traffic sources, user counts, sessions, conversions, and custom metrics. |
+| `google-ads` | Query, audit, and optimize Google Ads campaigns. Supports API mode for bulk operations or browser automation for users without API access. |
+| `gsc` | Query Google Search Console for SEO data - search queries, top pages, CTR opportunities, URL inspection, and sitemaps. |
 | `jira` | Manage Jira issues, boards, sprints, and projects via the jira-cli. Search, create, update, and transition issues. |
 | `nudocs` | Upload, edit, and export documents via Nudocs.ai for creating shareable document links. |
 | `planner` | Create structured plans for multi-task projects. Pairs with task-orchestrator for execution. |
