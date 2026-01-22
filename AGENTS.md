@@ -2,90 +2,95 @@
 
 Instructions for AI agents working on this repository.
 
-## Repository Purpose
+## Repository Structure
 
-This is a collection of AI agent skills. Each skill in `/skills` is a self-contained module that teaches an AI agent how to perform a specific task.
+```
+agent-skills/
+├── skills/      # Skills with tooling, scripts, or workflows
+├── prompts/     # Pure instruction prompts (text only)
+├── clawdbot/    # Clawdbot-specific skills
+├── scripts/     # Repo maintenance scripts
+├── README.md    # Main documentation (auto-generated sections)
+└── AGENTS.md    # This file
+```
 
-## Adding a New Skill
+## Adding Content
 
-1. Create a new folder in `/skills`:
+### Adding a Skill (with tooling)
+
+1. Create folder in `/skills`:
+   ```bash
+   mkdir -p skills/my-skill
    ```
-   skills/my-new-skill/
-   ```
 
-2. Create `SKILL.md` with proper frontmatter:
+2. Create `SKILL.md` with frontmatter:
    ```markdown
    ---
-   name: my-new-skill
-   description: Brief one-line description of what this skill does
+   name: my-skill
+   description: What this skill does
    ---
 
-   # My New Skill
+   # My Skill
 
-   Detailed instructions...
+   Instructions, scripts, templates...
    ```
 
-3. Add any supporting files:
+3. Add supporting files:
    - `scripts/` — Helper scripts
    - `templates/` — Template files
    - `examples/` — Example inputs/outputs
-   - `README.md` — Additional documentation
 
-4. Run validation:
+### Adding a Prompt (pure guidance)
+
+1. Create folder in `/prompts`:
    ```bash
-   ./scripts/validate-skills.sh
+   mkdir -p prompts/my-prompt
    ```
 
-5. Update the README:
-   ```bash
-   ./scripts/update-readme.sh
+2. Create `SKILL.md` with frontmatter:
+   ```markdown
+   ---
+   name: my-prompt
+   description: Guidance for X
+   ---
+
+   # My Prompt
+
+   Instructions and guidelines...
    ```
 
-## SKILL.md Format
+Prompts should be self-contained — no external dependencies or scripts.
 
-Required frontmatter fields:
-- `name`: Skill identifier (lowercase, hyphens)
+### Adding Clawdbot Skills
+
+Same as skills, but in `/clawdbot`:
+```bash
+mkdir -p clawdbot/my-clawdbot-skill
+```
+
+## SKILL.md Requirements
+
+**Required frontmatter:**
+- `name`: Identifier (lowercase, hyphens)
 - `description`: One-line description
 
-Optional frontmatter:
-- `version`: Semantic version
-- `author`: Creator name
-- `tags`: Comma-separated tags
+**Good SKILL.md structure:**
+1. Quick usage examples at the top
+2. Detailed instructions
+3. Edge cases / troubleshooting
+4. References to supporting files
 
-### Structure Guidelines
+## Validation
 
-1. **Start with Quick Reference** — Show usage examples immediately
-2. **Be Specific** — Concrete commands, not vague instructions
-3. **Include Examples** — Show inputs and expected outputs
-4. **Document Edge Cases** — What to do when things go wrong
-5. **Keep It Scannable** — Use headers, lists, code blocks
+Before committing:
+
+```bash
+./scripts/validate-skills.sh
+```
 
 ## Conventions
 
-- Skill names: lowercase with hyphens (`elegant-reports`, not `ElegantReports`)
+- Skill names: lowercase with hyphens (`elegant-reports`)
 - Scripts should be executable (`chmod +x`)
-- Include `.env.example` if skill needs environment variables
-- Prefer shell scripts for simple automation, Node.js for complex logic
-
-## Testing Skills
-
-Before committing, verify:
-1. `SKILL.md` has valid frontmatter
-2. All scripts are executable
-3. No hardcoded paths specific to one machine
-4. README is updated with new skill
-
-## File Locations
-
-```
-jdrhyne-skills/
-├── README.md           # Main documentation (auto-updated)
-├── AGENTS.md           # This file
-├── scripts/
-│   ├── update-readme.sh
-│   └── validate-skills.sh
-└── skills/
-    └── skill-name/
-        ├── SKILL.md    # Required
-        └── ...         # Supporting files
-```
+- No hardcoded machine-specific paths
+- Don't commit credentials or API keys
