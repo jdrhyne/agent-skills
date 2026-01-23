@@ -1,5 +1,9 @@
 # agent-skills
 
+<p align="center">
+  <img src="assets/hero-banner.png" alt="Agent Skills" width="100%">
+</p>
+
 A collection of AI agent skills and prompts for [Clawdbot](https://github.com/clawdbot/clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
 ## Structure
