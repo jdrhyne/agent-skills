@@ -67,6 +67,7 @@ Each sprint must:
 ## Prerequisites
 - [Dependencies or requirements that must be met first]
 - [Tools, libraries, or access needed]
+- [Tooling limitations, e.g., browser relay/CDP restrictions]
 
 ## Sprint 1: [Sprint Name]
 **Goal**: [What this sprint accomplishes]

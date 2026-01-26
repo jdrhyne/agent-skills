@@ -360,6 +360,7 @@ rm -rf "$WORKDIR"
 5. **Checkpoint logs** — Capture tmux output periodically to files
 6. **Phase gates** — Don't start Phase N+1 until Phase N is 100% complete
 7. **Self-heal aggressively** — If stuck >10 mins, intervene automatically
+8. **Browser relay limits** — If CDP automation is blocked, use iframe batch scraping or manual browser steps
 
 ---
 

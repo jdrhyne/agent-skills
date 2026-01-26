@@ -79,6 +79,44 @@ Check for multiple pages:
 
 Navigate to each page and collect URLs.
 
+### 4b. Batch scrape multiple galleries (iframe trick)
+
+When you need multiple galleries quickly and can’t automate CDP, you can load each gallery in a hidden iframe and extract `data-max` URLs:
+
+```javascript
+async () => {
+  const urls = [
+    'https://site.example/galleries/view/123',
+    'https://site.example/galleries/view/456'
+  ];
+  const results = [];
+  for (const url of urls) {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '800px';
+    iframe.style.height = '600px';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    await new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error('timeout load')), 20000);
+      iframe.onload = () => { clearTimeout(t); resolve(); };
+    });
+    const doc = iframe.contentDocument;
+    const start = Date.now();
+    let imgs = [];
+    while (Date.now() - start < 20000) {
+      imgs = Array.from(doc.querySelectorAll('img[data-max]')).map(i => i.dataset.max);
+      if (imgs.length) break;
+      await new Promise(r => setTimeout(r, 500));
+    }
+    results.push({ id: url.split('/').pop(), urls: imgs });
+    iframe.remove();
+  }
+  return results;
+}
+```
+
 ### 5. Check CDN Access
 
 Test if CDN requires authentication or just Referer:
@@ -107,6 +145,34 @@ while IFS= read -r url; do
   [ $(jobs -r | wc -l) -ge 8 ] && wait -n
 done < urls.txt
 wait
+```
+
+**Python ThreadPool fallback (avoids shell quoting + wait -n issues):**
+
+```python
+import os
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+outdir = os.path.expanduser('~/Downloads/gallery_name')
+os.makedirs(outdir, exist_ok=True)
+headers = {'Referer': 'https://SITE_DOMAIN/', 'User-Agent': 'Mozilla/5.0'}
+
+with open('urls.txt') as f:
+    urls = [line.strip() for line in f if line.strip()]
+
+def download(url):
+    filename = os.path.join(outdir, os.path.basename(url))
+    if os.path.exists(filename) and os.path.getsize(filename) > 0:
+        return
+    r = requests.get(url, headers=headers, timeout=60)
+    r.raise_for_status()
+    with open(filename, 'wb') as f:
+        f.write(r.content)
+
+with ThreadPoolExecutor(max_workers=8) as ex:
+    for url in urls:
+        ex.submit(download, url)
 ```
 
 ## Handling Lock Buttons

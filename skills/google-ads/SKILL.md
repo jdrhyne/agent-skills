@@ -177,3 +177,6 @@ When reporting findings, use tables:
 - **Authentication failed**: Refresh OAuth token, check `google-ads.yaml`
 - **Developer token rejected**: Ensure token is approved (not test mode)
 - **Customer ID error**: Use 10-digit ID without dashes
+- **proto-plus CopyFrom errors**: Assign directly (e.g., `operation.create = obj`) instead of `CopyFrom` on create fields
+- **contains_eu_political_advertising required**: Set to integer `0/1` (not boolean)
+- **RSA text too long**: Descriptions must be ≤ 90 chars
