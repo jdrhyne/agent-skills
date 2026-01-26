@@ -92,6 +92,7 @@ Skills designed specifically for [Clawdbot](https://github.com/clawdbot/clawdbot
 | `clawdbot-release-check` | Check for new Clawdbot releases and notify once per version. |
 | `clawddocs` | Clawdbot documentation expert with search, navigation, and config snippets. |
 | `gallery-scraper` | Bulk download images from authenticated gallery websites via browser relay. |
+| `self-improving-agent` | Captures errors/lessons and logs learnings for continuous improvement. |
 | `skill-sync` | Sync skills between local installation and shared repositories. |
 | `todo-tracker` | Persistent TODO scratch pad for tracking tasks across sessions. |
 

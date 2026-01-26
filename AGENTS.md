@@ -88,6 +88,16 @@ Before committing:
 ./scripts/validate-skills.sh
 ```
 
+## Sync Rule (Required)
+
+If you add or update a skill **locally**, you must also:
+1) Add/update the corresponding skill folder in this repo
+2) Update the README skill list (Skills + Clawdbot-specific)
+3) Run `./scripts/validate-skills.sh`
+4) Open a **draft PR** with a clear What/Why/How/Testing description
+
+Use `clawdbot/skill-sync` if you want a helper, but the steps above are still required.
+
 ## Conventions
 
 - Skill names: lowercase with hyphens (`elegant-reports`)
