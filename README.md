@@ -42,6 +42,8 @@
 
 A collection of AI agent skills and prompts for [Clawdbot](https://github.com/clawdbot/clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
+> **🤝 Contributions Welcome!** Have a skill that makes your AI agent smarter? We'd love to include it. [See how to contribute](#-contributing) or just open a PR.
+
 ## Structure
 
 ```
