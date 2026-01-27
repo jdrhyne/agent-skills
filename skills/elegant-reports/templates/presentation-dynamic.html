@@ -163,6 +163,21 @@ body {
   margin: 2rem 0 0.75rem 0;
   page-break-after: avoid;
   break-after: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Keep heading + following content together */
+.content h2 + p,
+.content h2 + ul,
+.content h2 + ol,
+.content h2 + table,
+.content h3 + p,
+.content h3 + ul,
+.content h3 + ol,
+.content h3 + table {
+  page-break-before: avoid;
+  break-before: avoid;
 }
 
 /* Body Text */
@@ -275,8 +290,13 @@ body {
   border: none;
   height: 3px;
   background: linear-gradient(90deg, var(--accent) 0%, #60a5fa 50%, var(--accent) 100%);
-  margin: 3rem 0;
+  margin: 2.5rem 0;
   border-radius: 2px;
+  /* Prevent orphaned hr elements */
+  page-break-before: avoid;
+  break-before: avoid;
+  page-break-after: avoid;
+  break-after: avoid;
 }
 
 /* === FOOTER === */
