@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style>
+{{styles}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    
+    <!-- Compact Header -->
+    <header class="report-header">
+      <div>
+        <h1 class="report-title">{{title}}</h1>
+        <p class="report-subtitle">{{subtitle}}</p>
+      </div>
+      <div class="report-meta">
+        <div class="report-meta-item"><strong>Date:</strong> {{date}}</div>
+        <div class="report-meta-item"><strong>Author:</strong> {{author}}</div>
+      </div>
+    </header>
+    
+    <!-- Dynamic Content -->
+    <div class="report-content">
+{{content}}
+    </div>
+    
+    <footer class="report-footer">
+      <span>Prepared by {{author}}</span>
+      <span>{{date}} · Confidential</span>
+    </footer>
+    
+  </div>
+</body>
+</html>

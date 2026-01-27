@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style>
+{{styles}}
+
+/* Presentation-specific overrides for dynamic content */
+.exec-content h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 2rem 0 1rem 0;
+  page-break-before: always;
+}
+
+.exec-content h1:first-child {
+  page-break-before: avoid;
+}
+
+.exec-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  color: var(--color-text-primary, #0A0A0A);
+}
+
+.exec-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.exec-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0.75rem 0;
+}
+
+.exec-content ul, .exec-content ol {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 1rem 0;
+}
+
+.exec-content li {
+  margin: 0.5rem 0;
+}
+
+.exec-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 1rem;
+}
+
+.exec-content th {
+  background: #0A0A0A;
+  color: #FFFFFF;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.exec-content td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.exec-content tr:nth-child(even) {
+  background: #FAFAFA;
+}
+
+.exec-content blockquote {
+  border-left: 4px solid #2563EB;
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  font-size: 1.25rem;
+  font-style: italic;
+  color: #404040;
+}
+
+.exec-content hr {
+  border: none;
+  border-top: 2px solid #E5E5E5;
+  margin: 2rem 0;
+}
+
+.exec-content code {
+  background: #F5F5F5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 0.9em;
+}
+
+.exec-content pre {
+  background: #0A0A0A;
+  color: #FAFAFA;
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.exec-content pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+  </style>
+</head>
+<body>
+  <div class="page">
+    
+    <!-- Header - BIG & BOLD -->
+    <header class="exec-header">
+      <h1 class="exec-title">{{title}}</h1>
+      <p class="exec-subtitle">{{subtitle}}</p>
+      <p class="exec-meta">{{date}}</p>
+    </header>
+    
+    <!-- Dynamic Content -->
+    <div class="exec-content">
+{{content}}
+    </div>
+    
+    <footer class="exec-footer">
+      Prepared by {{author}} · {{date}} · Confidential
+    </footer>
+    
+  </div>
+</body>
+</html>

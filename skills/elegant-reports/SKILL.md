@@ -29,10 +29,14 @@ node generate.js --list
 
 | Template | Style | Use Case |
 |----------|-------|----------|
-| `report` | Dense, multi-column | Deep dives, analysis, competitive intel |
+| `report` | Dense, multi-column | Deep dives, analysis, strategy docs |
 | `presentation` | Big & bold, one idea/page | Exec briefings, board decks |
+| `report-demo` | Static example | Demo only (hardcoded Apryse content) |
+| `presentation-demo` | Static example | Demo only (hardcoded Apryse content) |
 
 Each template supports `--theme light` (default) or `--theme dark`.
+
+**Note:** The `report` and `presentation` templates dynamically inject your markdown content via `{{content}}`. The `-demo` variants contain static example content for reference.
 
 ## Frontmatter
 

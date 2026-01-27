@@ -29,7 +29,7 @@ const CONFIG = {
 const TEMPLATES = {
   presentation: {
     description: 'Big bold slides, one idea per page (exec briefings, board decks)',
-    template: 'executive-v2.html',
+    template: 'presentation-dynamic.html',
     themes: {
       light: 'nordic-v2.css',
       dark: 'nordic-v2.css'  // TODO: create presentation dark
@@ -37,6 +37,22 @@ const TEMPLATES = {
   },
   report: {
     description: 'Dense information layout, multi-column (deep dives, analysis)',
+    template: 'report-dynamic.html',
+    themes: {
+      light: 'nordic-report.css',
+      dark: 'nordic-report-dark.css'
+    }
+  },
+  'presentation-demo': {
+    description: '[Demo] Static Apryse example - presentation format',
+    template: 'executive-v2.html',
+    themes: {
+      light: 'nordic-v2.css',
+      dark: 'nordic-v2.css'
+    }
+  },
+  'report-demo': {
+    description: '[Demo] Static Apryse example - report format',
     template: 'report-v2.html',
     themes: {
       light: 'nordic-report.css',
