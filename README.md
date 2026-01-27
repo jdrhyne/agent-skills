@@ -78,6 +78,7 @@ Skills include tooling, templates, scripts, or structured workflows:
 | `google-ads` | Query, audit, and optimize Google Ads campaigns. Supports API mode for bulk operations or browser automation for users without API access. |
 | `gsc` | Query Google Search Console for SEO data - search queries, top pages, CTR opportunities, URL inspection, and sitemaps. |
 | `jira` | Manage Jira issues, boards, sprints, and projects via the jira-cli. Search, create, update, and transition issues. |
+| `last30days` | Research what the internet is saying about any topic over the last 30 days. Searches Hacker News, Stack Overflow, Dev.to, Lobsters, and optionally Reddit and X. |
 | `nudocs` | Upload, edit, and export documents via Nudocs.ai for creating shareable document links. |
 | `parallel-task` | Execute plan files by launching multiple parallel subagents to complete tasks simultaneously. Credit: [@am-will](https://github.com/am-will). |
 | `planner` | Create structured plans for multi-task projects. Pairs with task-orchestrator for execution. |
