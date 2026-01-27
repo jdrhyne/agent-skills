@@ -87,9 +87,12 @@ function loadApiKey() {
 function markdownToHtml(markdown) {
   let html = markdown;
   
-  // Code blocks
+  // Step 1: Extract code blocks and replace with placeholders to protect them
+  const codeBlocks = [];
   html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre><code class="language-${lang || 'text'}">${escapeHtml(code.trim())}</code></pre>`;
+    const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+    codeBlocks.push(`<pre><code class="language-${lang || 'text'}">${escapeHtml(code.trim())}</code></pre>`);
+    return placeholder;
   });
   
   // Inline code
@@ -122,8 +125,13 @@ function markdownToHtml(markdown) {
   html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
   html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
   
-  // Paragraphs
-  html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+  // Paragraphs - skip lines that are placeholders or already HTML tags
+  html = html.replace(/^(?!<[a-z]|__|$)(.+)$/gm, '<p>$1</p>');
+  
+  // Step 2: Restore code blocks from placeholders
+  codeBlocks.forEach((block, i) => {
+    html = html.replace(`__CODE_BLOCK_${i}__`, block);
+  });
   
   return html;
 }
