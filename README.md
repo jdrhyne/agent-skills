@@ -293,6 +293,14 @@ Open an issue to discuss before building something big!
 
 ---
 
+## 🦞 Lobster Workflows
+
+Looking for deterministic, repeatable automation pipelines? Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — a companion repo of ready-to-use [Lobster](https://github.com/clawdbot/lobster) workflow templates for Clawdbot.
+
+Lobster replaces freeform LLM orchestration with typed pipelines, approval gates, and state tracking. The repo includes workflows for content publishing, PR monitoring, release announcements, multi-agent coordination, and knowledge extraction.
+
+---
+
 ## License
 
 MIT — Use these skills however you like.
