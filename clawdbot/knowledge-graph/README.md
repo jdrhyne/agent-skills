@@ -116,6 +116,41 @@ life/areas/
         └── facts.jsonl
 ```
 
+## Low-token Recall Policy
+
+To minimize context window usage, recall should be **triggered**, not automatic.
+
+### Rules
+
+| Rule | Behavior |
+|------|----------|
+| **Trigger-based** | Only recall on proper nouns, "remember/recall" phrases, or project keywords |
+| **Summaries only** | Inject summary.md (max 5 lines), never facts.jsonl unless asked |
+| **Single profile** | When topic is preferences/planning, use one profile summary |
+
+### Why This Matters
+
+- **No recall unless triggered** — most messages skip recall entirely, saving tokens
+- **Summaries only** — 5 lines vs potentially hundreds of raw facts
+- **Lean context** — keeps your agent fast and cost-effective
+
+### Add to AGENTS.md
+
+```markdown
+### Low-token Recall Policy
+- Only recall on triggers (proper nouns, "remember/recall", or project keywords).
+- Inject summary.md only (max 5 lines); never inject facts.jsonl unless asked.
+- Use a single profile summary when preferences/planning are the topic.
+```
+
+### Add to HEARTBEAT.md
+
+```markdown
+## Low-token Recall (Rule)
+- [ ] Only recall on triggers (proper nouns, "remember/recall", project keywords)
+- [ ] Inject summary.md only (max 5 lines) unless user explicitly asks for details
+```
+
 ## Credits
 
 Inspired by [@spacepixel's article on X](https://x.com/spacepixel) about building memory systems for AI agents.

@@ -126,6 +126,47 @@ When an agent needs context about an entity:
 3. Use memory_search as fallback for entities not yet in the graph
 ```
 
+## Low-token Recall Policy
+
+To minimize token usage, recall should be **triggered**, not automatic.
+
+### Rules
+
+1. **Only recall on triggers:**
+   - Proper nouns (names of people, companies, projects you track)
+   - Explicit recall phrases: "remember", "recall", "what do we know about"
+   - Project keywords that match entity slugs
+
+2. **Inject summary.md only** (max 5 lines) — never inject facts.jsonl unless:
+   - User explicitly asks for details/specifics
+   - Summary is stale or missing
+   - Contradictory information needs resolution
+
+3. **Use a single profile summary** when the topic is preferences or planning
+
+### Why This Matters
+
+- **No recall unless triggered** — most messages skip recall entirely
+- **Summaries only** — very short injections (5 lines vs potentially hundreds of facts)
+- **No raw facts unless requested** — keeps context window lean
+
+### Add to AGENTS.md
+
+```markdown
+### Low-token Recall Policy
+- Only recall on triggers (proper nouns, "remember/recall", or project keywords).
+- Inject summary.md only (max 5 lines); never inject facts.jsonl unless asked.
+- Use a single profile summary when preferences/planning are the topic.
+```
+
+### Add to HEARTBEAT.md
+
+```markdown
+## Low-token Recall (Rule)
+- [ ] Only recall on triggers (proper nouns, "remember/recall", project keywords)
+- [ ] Inject summary.md only (max 5 lines) unless user explicitly asks for details
+```
+
 ## Creating New Entities
 
 When you encounter a new person/company/project worth tracking:
