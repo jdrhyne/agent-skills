@@ -6,105 +6,121 @@
   <title>{{title}}</title>
   <style>
 {{styles}}
+
+/* Presentation-specific styles */
+.presentation-cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, var(--color-text-primary) 0%, #374151 100%);
+  color: white;
+  padding: var(--space-16);
+  page-break-after: always;
+}
+
+.presentation-cover h1 {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--space-6);
+  color: white;
+}
+
+.presentation-cover .subtitle {
+  font-size: var(--text-xl);
+  opacity: 0.9;
+  margin-bottom: var(--space-8);
+}
+
+.presentation-cover .meta {
+  font-size: var(--text-base);
+  opacity: 0.7;
+}
+
+/* Content sections with page breaks on H1 */
+.presentation-content h1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  border-bottom: 4px solid var(--color-accent);
+  padding-bottom: var(--space-4);
+  margin-top: var(--space-16);
+  margin-bottom: var(--space-8);
+  page-break-before: always;
+}
+
+.presentation-content h1:first-child {
+  page-break-before: auto;
+}
+
+.presentation-content h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-accent-dark);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+.presentation-content h3 {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+/* Horizontal rule = page break */
+.presentation-content hr {
+  border: none;
+  height: 0;
+  margin: 0;
+  page-break-after: always;
+}
+
+/* Footer on each page */
+.presentation-footer {
+  position: fixed;
+  bottom: var(--space-6);
+  left: var(--space-8);
+  right: var(--space-8);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media print {
+  .presentation-content h1 {
+    page-break-before: always;
+  }
+  .presentation-content h1:first-child {
+    page-break-before: auto;
+  }
+  .presentation-content hr {
+    page-break-after: always;
+  }
+}
   </style>
 </head>
 <body>
-  <div class="page">
-    
-    <!-- Header - BIG & BOLD -->
-    <header class="exec-header">
-      <h1 class="exec-title">{{title}}</h1>
-      <p class="exec-subtitle">{{subtitle}}</p>
-      <p class="exec-meta">{{date}}</p>
-    </header>
-    
-    <!-- Hero Metric - The One Big Number -->
-    <div class="hero-metric">
-      <div class="hero-value">$10.8M</div>
-      <div class="hero-label">Total ACV Lost to Apryse</div>
-      <span class="hero-change negative">603 deals since 2024</span>
-    </div>
-    
-    <!-- Supporting Metrics -->
-    <div class="metrics-row">
-      <div class="metric-card">
-        <div class="metric-value">17%</div>
-        <div class="metric-label">Lost on Price</div>
-        <div class="metric-change negative">Primary reason</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">#1</div>
-        <div class="metric-label">Competitor Threat</div>
-        <div class="metric-change">By revenue impact</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">~$112M</div>
-        <div class="metric-label">Apryse Revenue</div>
-        <div class="metric-change">Post-acquisitions</div>
-      </div>
-    </div>
-    
-    <!-- Key Findings -->
-    <div class="key-points">
-      <div class="key-points-title">Why We Lose</div>
-      <ul>
-        <li><strong>Price (17%)</strong> — Apryse undercuts aggressively: $2-7K vs our $30K+ quotes</li>
-        <li><strong>Large document performance</strong> — "10,000+ pages loaded nearly instantly"</li>
-        <li><strong>Feature breadth</strong> — Annotation presets, native Office editing, Java superiority</li>
-        <li><strong>Existing relationships</strong> — Sticky customers, free trials, fast sales process</li>
-      </ul>
-    </div>
-    
-    <!-- Critical Losses Table -->
-    <h2>Biggest Losses</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Gap</th>
-          <th>Account</th>
-          <th class="num">ACV Lost</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Java library depth</td>
-          <td>Egnyte</td>
-          <td class="num">$142,000</td>
-        </tr>
-        <tr>
-          <td>Large doc performance</td>
-          <td>Reveal</td>
-          <td class="num">$54,500</td>
-        </tr>
-        <tr>
-          <td>Annotation presets</td>
-          <td>PARSPEC</td>
-          <td class="num">$26,500</td>
-        </tr>
-        <tr>
-          <td>Client-side conversion</td>
-          <td>Shade Inc</td>
-          <td class="num">$15,000</td>
-        </tr>
-        <tr>
-          <td>Native Office editing</td>
-          <td>Boardable</td>
-          <td class="num">$12,500</td>
-        </tr>
-      </tbody>
-    </table>
-    
-    <!-- Recommendation -->
-    <div class="callout callout-tip">
-      <div class="callout-title">Recommended Actions</div>
-      <p><strong>This week:</strong> Populate Competitor field in Salesforce, set up Gong keyword trackers for Apryse/PDFTron/iText.</p>
-      <p style="margin-bottom:0"><strong>This month:</strong> Develop competitive battlecard, assess file attachment feature gap, investigate Apryse viewer compatibility issues.</p>
-    </div>
-    
-    <footer class="exec-footer">
-      Prepared by {{author}} · {{date}} · Confidential
-    </footer>
-    
+  <!-- Cover Page -->
+  <div class="presentation-cover">
+    <h1>{{title}}</h1>
+    <p class="subtitle">{{subtitle}}</p>
+    <p class="meta">{{author}} · {{date}}</p>
   </div>
+  
+  <!-- Main Content (from markdown) -->
+  <main class="presentation-content">
+{{content}}
+  </main>
+  
+  <footer class="presentation-footer">
+    <span>{{author}}</span>
+    <span>{{date}} · Confidential</span>
+  </footer>
 </body>
 </html>
