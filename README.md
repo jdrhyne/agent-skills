@@ -20,7 +20,7 @@
                  ╱  ▲▲  ╲  │  ◄► JIRA  ◄► GA4  ◄► GOOGLE ADS ◄►  │  ╱  ▲▲  ╲
                 ╱  ▲▲▲▲  ╲ │  ◄► GSC  ◄► REMOTION  ◄► PLANNER ◄► │ ╱  ▲▲▲▲  ╲
                ╱   ▲▲▲▲   ╲│  ◄► ORCHESTRATOR  ◄► SYSADMIN  ◄►   │╱   ▲▲▲▲   ╲
-              ╱            ╲│  ◄► KNOWLEDGE-GRAPH  ◄►              │╱            ╲
+              ╱            ╲│  ◄► KNOWLEDGE-GRAPH  ◄► NUTRIENT ◄►  │╱            ╲
               ╱════════════╲─────────────────────────────────────╱════════════╲
              ╱  ░░░░░░░░░░  ╲                                    ╱  ░░░░░░░░░░  ╲
             ╱  ░░░░░░░░░░░░  ╲                                  ╱  ░░░░░░░░░░░░  ╲
@@ -85,6 +85,7 @@ Skills include tooling, templates, scripts, or structured workflows:
 | [`last30days`](skills/last30days/) | Research what the internet is saying about any topic over the last 30 days. Searches Hacker News, Stack Overflow, Dev.to, Lobsters, and optionally Reddit and X. Based on [@mvanhorn](https://github.com/mvanhorn)'s [last30days-skill](https://github.com/mvanhorn/last30days-skill). |
 | [`salesforce`](skills/salesforce/) | Query and manage Salesforce orgs via the official Salesforce MCP server or SF CLI. |
 | [`nudocs`](skills/nudocs/) | Upload, edit, and export documents via Nudocs.ai for creating shareable document links. |
+| [`nutrient-openclaw`](skills/nutrient-openclaw/) | Document processing for OpenClaw via Nutrient DWS API. Convert formats, extract text/tables, OCR, AI-powered PII redaction, digital signatures, and watermarks. |
 | [`parallel-task`](skills/parallel-task/) | Execute plan files by launching multiple parallel subagents to complete tasks simultaneously. Credit: [@am-will](https://github.com/am-will). |
 | [`planner`](skills/planner/) | Create structured plans for multi-task projects. Pairs with task-orchestrator for execution. |
 | [`remotion`](skills/remotion/) | Best practices for Remotion video creation in React. Includes extensive rules and reference files. |
