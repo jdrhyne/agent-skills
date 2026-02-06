@@ -1,7 +1,7 @@
 ---
 name: clawdbot-release-check
 description: Check for new clawdbot releases and notify once per new version.
-homepage: https://github.com/clawdbot/clawdbot
+homepage: https://github.com/openclaw/openclaw
 metadata: {"clawdbot":{"emoji":"🔄","requires":{"bins":["curl","jq"]}}}
 ---
 
@@ -57,7 +57,7 @@ launchctl kickstart -k gui/$(id -u)/com.clawdis.gateway
 
 ## How It Works
 
-1. Fetches latest release from `github.com/clawdbot/clawdbot/releases`
+1. Fetches latest release from `github.com/openclaw/openclaw/releases`
 2. Compares with your installed version (from `package.json`)
 3. If behind, shows highlights from release notes
 4. Saves state to prevent repeat notifications
@@ -77,7 +77,7 @@ _(3 versions behind)_
 - Agent tools: new `image` tool
 - Config: default model shorthands
 
-🔗 https://github.com/clawdbot/clawdbot/releases/tag/v2026.1.5-3
+🔗 https://github.com/openclaw/openclaw/releases/tag/v2026.1.5-3
 
 To update: `cd /path/to/clawdis && git pull && pnpm install && pnpm build`
 ```

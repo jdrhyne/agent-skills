@@ -35,17 +35,17 @@
                          ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
         ══════════════════════════════════════════════════════════════════════
-           MOLTBOT  ●  CLAUDE CODE  ●  CODEX  ●  CURSOR  ●  ANY LLM AGENT
+           OPENCLAW  ●  CLAUDE CODE  ●  CODEX  ●  CURSOR  ●  ANY LLM AGENT
         ══════════════════════════════════════════════════════════════════════
 
                               ©1987 JDRHYNE ENTERTAINMENT
 ```
 
-A collection of AI agent skills and prompts for [Moltbot](https://github.com/clawdbot/clawdbot) (formerly Clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
+A collection of AI agent skills and prompts for [OpenClaw](https://github.com/openclaw/openclaw) (formerly Clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
 > **🤝 Contributions Welcome!** Have a skill that makes your AI agent smarter? We'd love to include it. [See how to contribute](#-contributing) or just open a PR.
 
-> **🦞 Looking for deterministic automation pipelines?** Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — ready-to-use workflow templates with approval gates, state tracking, and repeatable pipelines for Moltbot.
+> **🦞 Looking for deterministic automation pipelines?** Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — ready-to-use workflow templates with approval gates, state tracking, and repeatable pipelines for OpenClaw.
 
 ## Structure
 
@@ -53,19 +53,19 @@ A collection of AI agent skills and prompts for [Moltbot](https://github.com/cla
 agent-skills/
 ├── skills/      # Skills with tooling, scripts, or structured workflows
 ├── prompts/     # Pure instruction prompts (guidance text only)
-├── clawdbot/    # Moltbot-specific skills
+├── clawdbot/    # OpenClaw-specific skills
 └── codex/       # Codex CLI-specific skills
 ```
 
 ## Compatibility
 
-**79% of skills work across all platforms** (Moltbot, Claude Code, Codex).
+**79% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
 
 | Category | Count | Platforms |
 |----------|-------|-----------|
 | Universal | 7 | ✅ All |
 | Portable | 19 | ✅ All (uses read/write/exec) |
-| Moltbot-only | 7 | Moltbot only |
+| OpenClaw-only | 7 | OpenClaw only |
 
 See **[COMPATIBILITY.md](./COMPATIBILITY.md)** for the full matrix and installation instructions per platform.
 
@@ -105,15 +105,15 @@ Pure instruction prompts — guidance text that works with any AI agent:
 | [`senior-engineering`](prompts/senior-engineering/) | Engineering principles for building software like a senior engineer. Best practices for architecture, code quality, and decision-making. |
 | [`web-design-guidelines`](prompts/web-design-guidelines/) | Review UI code for Web Interface Guidelines compliance. Accessibility, UX patterns, and design system adherence. |
 
-## Moltbot-Specific (formerly Clawdbot)
+## OpenClaw-Specific (formerly Clawdbot)
 
-Skills designed specifically for [Moltbot](https://github.com/clawdbot/clawdbot):
+Skills designed specifically for [OpenClaw](https://github.com/openclaw/openclaw):
 
 | Skill | Description |
 |-------|-------------|
-| [`auto-updater`](clawdbot/auto-updater/) | Automatically update Moltbot and installed skills daily via cron. |
-| [`clawdbot-release-check`](clawdbot/clawdbot-release-check/) | Check for new Moltbot releases and notify once per version. |
-| [`clawddocs`](clawdbot/clawddocs/) | Moltbot documentation expert with search, navigation, and config snippets. |
+| [`auto-updater`](clawdbot/auto-updater/) | Automatically update OpenClaw and installed skills daily via cron. |
+| [`clawdbot-release-check`](clawdbot/clawdbot-release-check/) | Check for new OpenClaw releases and notify once per version. |
+| [`clawddocs`](clawdbot/clawddocs/) | OpenClaw documentation expert with search, navigation, and config snippets. |
 | [`gallery-scraper`](clawdbot/gallery-scraper/) | Bulk download images from authenticated gallery websites via browser relay. |
 | [`knowledge-graph`](clawdbot/knowledge-graph/) | Three-Layer Memory System with automatic fact extraction, entity-based knowledge graph, and weekly synthesis. |
 | [`self-improving-agent`](clawdbot/self-improving-agent/) | Captures errors/lessons and logs learnings for continuous improvement. |
@@ -136,9 +136,9 @@ Skills designed for [Codex CLI](https://github.com/openai/codex) (OpenAI's codin
 
 ## Installation
 
-### With Moltbot
+### With OpenClaw
 
-Add skill paths to your Moltbot config:
+Add skill paths to your OpenClaw config:
 
 ```yaml
 skills:
@@ -298,7 +298,7 @@ Open an issue to discuss before building something big!
 
 ## 🦞 Lobster Workflows
 
-Looking for deterministic, repeatable automation pipelines? Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — a companion repo of ready-to-use [Lobster](https://github.com/clawdbot/lobster) workflow templates for Moltbot.
+Looking for deterministic, repeatable automation pipelines? Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — a companion repo of ready-to-use [Lobster](https://github.com/openclaw/lobster) workflow templates for OpenClaw.
 
 Lobster replaces freeform LLM orchestration with typed pipelines, approval gates, and state tracking. The repo includes workflows for content publishing, PR monitoring, release announcements, multi-agent coordination, and knowledge extraction.
 
