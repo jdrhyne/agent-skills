@@ -18,6 +18,7 @@ These skills are pure instruction/methodology with no tool dependencies:
 
 | Skill | Location |
 |-------|----------|
+| `design-audit` | `skills/design-audit` |
 | `planner` | `skills/planner` |
 | `remotion` | `skills/remotion` |
 | `frontend-design` | `prompts/frontend-design` |
