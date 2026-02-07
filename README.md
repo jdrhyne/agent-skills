@@ -63,7 +63,7 @@ agent-skills/
 
 | Category | Count | Platforms |
 |----------|-------|-----------|
-| Universal | 7 | ✅ All |
+| Universal | 8 | ✅ All |
 | Portable | 19 | ✅ All (uses read/write/exec) |
 | OpenClaw-only | 7 | OpenClaw only |
 
@@ -76,6 +76,7 @@ Skills include tooling, templates, scripts, or structured workflows:
 | Skill | Description |
 |-------|-------------|
 | [`context-recovery`](skills/context-recovery/) | Automatically recover working context after session compaction. Fetches channel history, parses session logs, and synthesizes a structured summary. Works across Discord, Slack, Telegram, and Signal. |
+| [`design-audit`](skills/design-audit/) | Premium UI/UX design auditor with Jobs/Ive philosophy. Audits existing interfaces across 15 dimensions (hierarchy, spacing, typography, color, alignment, components, iconography, motion, states, dark mode, density, responsiveness, accessibility), applies ruthless simplification via the "Jobs Filter", and delivers phased improvement plans (Critical → Refinement → Polish) with approval gates before each implementation phase. Touches visual design only — never functionality. |
 | [`elegant-reports`](skills/elegant-reports/) | Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic via Nutrient DWS API. Includes templates, themes, and a Node.js generator. |
 | [`ga4`](skills/ga4/) | Query Google Analytics 4 (GA4) data via the Analytics Data API. Pull website analytics like top pages, traffic sources, user counts, sessions, conversions, and custom metrics. |
 | [`gong`](skills/gong/) | Gong API for searching calls, transcripts, and conversation intelligence. Supports listing calls, fetching transcripts, user management, and activity stats. |

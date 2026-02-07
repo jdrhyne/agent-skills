@@ -3,6 +3,10 @@ name: clawdbot-release-check
 description: Check for new clawdbot releases and notify once per new version.
 homepage: https://github.com/openclaw/openclaw
 metadata: {"clawdbot":{"emoji":"🔄","requires":{"bins":["curl","jq"]}}}
+permissions:
+  - network: "HTTPS calls to GitHub API to check latest release version"
+  - file_write: "Saves release check state to prevent repeat notifications"
+  - system_modification: "Guides user through update process (git pull, pnpm install)"
 ---
 
 # Clawdbot Release Check

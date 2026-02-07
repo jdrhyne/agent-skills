@@ -1,6 +1,9 @@
 ---
 name: skill-sync
 description: Sync Clawdbot skills between local installation and the shared skill repository. Use when asked to install, update, list, or push skills.
+permissions:
+  - file_write: "Copies skill files between local installation and shared repository"
+  - credential_access: "Documents that API keys and tokens must NOT be committed to shared repo"
 ---
 
 # Skill Sync

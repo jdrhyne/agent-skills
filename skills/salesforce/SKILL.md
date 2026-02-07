@@ -1,6 +1,10 @@
 ---
 name: salesforce
 description: Query and manage Salesforce orgs via the official Salesforce MCP server or SF CLI.
+permissions:
+  - credential_access: "Reads Salesforce CLI auth context for org access"
+  - network: "HTTPS calls to Salesforce APIs via sf CLI or MCP server"
+  - system_modification: "Requires npm install -g @salesforce/cli as prerequisite"
 ---
 
 # Salesforce Skill

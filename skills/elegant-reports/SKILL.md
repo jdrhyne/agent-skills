@@ -1,6 +1,11 @@
 ---
 name: elegant-reports
 description: Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic. Uses Nutrient DWS API for HTML-to-PDF conversion.
+permissions:
+  - credential_access: "NUTRIENT_DWS_API_KEY for Nutrient DWS API authentication"
+  - network: "HTTPS calls to Nutrient DWS API for HTML-to-PDF conversion"
+  - file_write: "Writes generated HTML and PDF report files to working directory"
+  - system_modification: "Requires npm install of axios and form-data dependencies"
 ---
 
 # elegant-reports
