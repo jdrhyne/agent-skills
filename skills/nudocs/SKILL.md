@@ -13,6 +13,11 @@ metadata:
         package: "@nutrient-sdk/nudocs-cli"
         bins: ["nudocs"]
         label: "Install Nudocs CLI (npm)"
+permissions:
+  - credential_access: "NUDOCS_API_KEY for Nudocs.ai API authentication"
+  - network: "HTTPS calls to Nudocs.ai API for document upload, edit, and export"
+  - file_write: "Writes exported documents to local filesystem"
+  - system_modification: "Requires npm install -g @nutrient-sdk/nudocs-cli"
 ---
 
 # Nudocs

@@ -1,6 +1,9 @@
 ---
 name: gong
 description: Gong API for searching calls, transcripts, and conversation intelligence. Use when working with Gong call recordings, sales conversations, transcripts, meeting data, or conversation analytics. Supports listing calls, fetching transcripts, user management, and activity stats.
+permissions:
+  - credential_access: "Reads access_key and secret_key from ~/.config/gong/credentials.json for Gong API auth"
+  - network: "HTTPS calls to Gong API (us-XXXXX.api.gong.io) for calls, transcripts, and users"
 ---
 
 # Gong
