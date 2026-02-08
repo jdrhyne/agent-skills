@@ -41,15 +41,15 @@
                               ©1987 JDRHYNE ENTERTAINMENT
 ```
 
-<a href="https://agentverus.ai"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Frepo-certified-pct.json&cacheSeconds=300&style=for-the-badge" height="36"></a>
-
-> Every skill in this repo is scanned by [**AgentVerus**](https://agentverus.ai) — an open-source security scanner that detects prompt injection, data exfiltration, and hidden threats in AI agent skill files. 34 of 35 skills are certified. [View full results →](https://jdrhyne.github.io/agent-skills/skills/index.json)
-
 A collection of AI agent skills and prompts for [OpenClaw](https://github.com/openclaw/openclaw) (formerly Clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
 > **🤝 Contributions Welcome!** Have a skill that makes your AI agent smarter? We'd love to include it. [See how to contribute](#-contributing) or just open a PR.
 
 > **🦞 Looking for deterministic automation pipelines?** Check out [**lobster-workflows**](https://github.com/jdrhyne/lobster-workflows) — ready-to-use workflow templates with approval gates, state tracking, and repeatable pipelines for OpenClaw.
+
+<a href="https://agentverus.ai"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Frepo-certified-pct.json&cacheSeconds=300&style=for-the-badge" height="36"></a>
+
+> Every skill in this repo is scanned by [**AgentVerus**](https://agentverus.ai) — an open-source security scanner that detects prompt injection, data exfiltration, and hidden threats in AI agent skill files. 34 of 35 skills are certified. [View full results →](https://jdrhyne.github.io/agent-skills/skills/index.json)
 
 ## Structure
 
