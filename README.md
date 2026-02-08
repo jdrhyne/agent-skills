@@ -41,7 +41,7 @@
                               ©1987 JDRHYNE ENTERTAINMENT
 ```
 
-[![AgentVerus Certified](https://img.shields.io/endpoint?url=https://jdrhyne.github.io/agent-skills/repo-certified-pct.json)](https://agentverus.ai)
+[![AgentVerus Certified 97%](https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Frepo-certified-pct.json&cacheSeconds=300)](https://agentverus.ai)
 
 A collection of AI agent skills and prompts for [OpenClaw](https://github.com/openclaw/openclaw) (formerly Clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
