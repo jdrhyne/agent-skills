@@ -41,6 +41,8 @@
                               ©1987 JDRHYNE ENTERTAINMENT
 ```
 
+[![AgentVerus Certified](https://img.shields.io/endpoint?url=https://jdrhyne.github.io/agent-skills/repo-certified-pct.json)](https://agentverus.ai)
+
 A collection of AI agent skills and prompts for [OpenClaw](https://github.com/openclaw/openclaw) (formerly Clawdbot), Claude Code, Codex, and other LLM-based coding assistants.
 
 > **🤝 Contributions Welcome!** Have a skill that makes your AI agent smarter? We'd love to include it. [See how to contribute](#-contributing) or just open a PR.

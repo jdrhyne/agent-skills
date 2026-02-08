@@ -23,6 +23,9 @@ build/
 .DS_Store
 Thumbs.db
 
+# Generated badges (published via GitHub Pages)
+badges/
+
 # Python
 __pycache__/
 *.pyc
