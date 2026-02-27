@@ -1,6 +1,17 @@
 ---
 name: gong
 description: Gong API for searching calls, transcripts, and conversation intelligence. Use when working with Gong call recordings, sales conversations, transcripts, meeting data, or conversation analytics. Supports listing calls, fetching transcripts, user management, and activity stats.
+metadata:
+  {
+    "openclaw":
+      {
+        "emoji": "🎙️",
+        "requires":
+          {
+            "config": ["~/.config/gong/credentials.json"],
+          },
+      },
+  }
 ---
 
 # Gong

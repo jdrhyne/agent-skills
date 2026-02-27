@@ -3,16 +3,29 @@ name: nudocs
 description: Upload, edit, and export documents via Nudocs.ai. Use when creating shareable document links for collaborative editing, uploading markdown/docs to Nudocs for rich editing, or pulling back edited content. Triggers on "send to nudocs", "upload to nudocs", "edit in nudocs", "pull from nudocs", "get the nudocs link", "show my nudocs documents".
 homepage: https://nudocs.ai
 metadata:
-  clawdbot:
-    emoji: "📄"
-    requires:
-      bins: ["nudocs"]
-    install:
-      - id: npm
-        kind: node
-        package: "@nutrient-sdk/nudocs-cli"
-        bins: ["nudocs"]
-        label: "Install Nudocs CLI (npm)"
+  {
+    "openclaw":
+      {
+        "emoji": "📄",
+        "requires":
+          {
+            "bins": ["nudocs"],
+            "env": ["NUDOCS_API_KEY"],
+            "config": ["~/.config/nudocs/api_key"],
+          },
+        "install":
+          [
+            {
+              "id": "npm",
+              "kind": "node",
+              "package": "@nutrient-sdk/nudocs-cli",
+              "repo": "https://github.com/PSPDFKit/nudocs-cli",
+              "bins": ["nudocs"],
+              "label": "Install Nudocs CLI (npm)",
+            },
+          ],
+      },
+  }
 ---
 
 # Nudocs
@@ -146,6 +159,6 @@ Agent:
 
 ## Links
 
-- CLI: https://github.com/PSPDFKit/nudocs-cli
+- CLI: https://github.com/PSPDFKit/nudocs-cli (`@nutrient-sdk/nudocs-cli` on npm)
 - MCP Server: https://github.com/PSPDFKit/nudocs-mcp-server
 - Nudocs: https://nudocs.ai

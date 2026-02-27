@@ -65,11 +65,6 @@ Load relevant references when user is:
 - `ctop` - container top
 - `lazydocker` - Docker TUI
 
-## Operational Gotchas (Recent)
-
-- **Git commit fails (GPG expired)**: Use `git -c commit.gpgsign=false commit ...` or renew your GPG key.
-- **/bin/sh vs bash**: `wait -n` is **bash-only**; use `/bin/bash -lc` or a Python ThreadPool fallback for parallel downloads.
-
 ## Keeping Current
 
 References auto-refresh weekly (Sundays 5am ET) from the upstream repo:
