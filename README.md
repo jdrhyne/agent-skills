@@ -73,6 +73,13 @@ agent-skills/
 └── codex/       # Codex CLI-specific skills
 ```
 
+## Source of Truth & Sync Policy
+
+- **GitHub is canonical** for all skills in this repository.
+- **ClawHub is a distribution mirror** for selected skills (primarily under `/skills`).
+- Some folders (notably `/clawdbot`, `/codex`, and `/prompts`) may include skills that are intentionally GitHub-only.
+- If ClawHub and GitHub differ, treat GitHub (`main`) as the authoritative version.
+
 ## Compatibility
 
 **79% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
