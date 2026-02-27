@@ -53,6 +53,16 @@ A collection of AI agent skills and prompts for [OpenClaw](https://github.com/op
 
 > Every skill in this repo is scanned by [**AgentVerus**](https://agentverus.ai) — an open-source security scanner that detects prompt injection, data exfiltration, and hidden threats in AI agent skill files. 34 of 35 skills are certified. [View full results →](https://jdrhyne.github.io/agent-skills/skills/index.json)
 
+
+## Nutrient MCP Servers (Builder Resources)
+
+If you're using these skills for document AI workflows, also check the official MCP servers:
+
+- [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) — Cloud document processing tools for AI agents
+- [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) — Self-hosted/on-prem deployment path
+- [Nutrient MCP landing page](https://www.nutrient.io/mcp-server-pdf-automation-llm/)
+- [Nutrient AI infrastructure overview](https://www.nutrient.io/ai/infrastructure/)
+
 ## Structure
 
 ```
