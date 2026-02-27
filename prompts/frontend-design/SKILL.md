@@ -1,7 +1,7 @@
 ---
 name: frontend-design
 description: Expert frontend design guidelines for creating beautiful, modern UIs. Use when building landing pages, dashboards, or any user interface.
-metadata: {"clawdbot":{"emoji":"🎨"}}
+metadata: {"openclaw":{"emoji":"🎨"}}
 ---
 
 # Frontend Design Skill

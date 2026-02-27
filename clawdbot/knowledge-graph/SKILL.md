@@ -1,7 +1,7 @@
 ---
 name: knowledge-graph
 description: Three-Layer Memory System — automatic fact extraction, entity-based knowledge graph, and weekly synthesis. Manages life/areas/ entities with atomic facts and living summaries.
-metadata: {"version":"1.0.0","clawdbot":{"emoji":"🧠"}}
+metadata: {"version":"1.1.0","openclaw":{"emoji":"🧠"}}
 ---
 
 # Knowledge Graph Skill
@@ -234,7 +234,7 @@ See `skills/knowledge-graph/SKILL.md` and `life/README.md` for full conventions.
 
 ### 3. Create Cron Jobs
 
-Set up two cron jobs in your Clawdbot config:
+Set up two cron jobs in your OpenClaw config:
 
 **Fact Extraction** — runs every 4 hours:
 ```yaml
