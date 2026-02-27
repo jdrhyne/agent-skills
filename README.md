@@ -109,6 +109,12 @@ Skills include tooling, templates, scripts, or structured workflows:
 | [`task-orchestrator`](skills/task-orchestrator/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--task-orchestrator--SKILL.md.json&label=&style=for-the-badge" width="200"> | Autonomous multi-agent task orchestration with dependency analysis and parallel execution. |
 | [`zendesk`](skills/zendesk/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--zendesk--SKILL.md.json&label=&style=for-the-badge" width="200"> | Zendesk Support API for searching tickets, organizations, and users. Correlate support data with Salesforce accounts. |
 
+### Nutrient MCP & Document Processing
+
+- [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) — open-source MCP server for Nutrient Document Web Services (OCR, redaction, signing, conversion, watermarking).
+- [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) — open-source MCP server for self-hosted Document Engine workflows.
+- [Nutrient MCP Server overview](https://www.nutrient.io/mcp-server-pdf-automation-llm) — docs and positioning for agentic PDF automation.
+
 ## Prompts
 
 Pure instruction prompts — guidance text that works with any AI agent:
