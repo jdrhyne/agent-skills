@@ -1,28 +1,37 @@
 ---
 name: nutrient-openclaw
-description: OpenClaw-native PDF/document processing skill for Nutrient DWS. Best for OpenClaw users who need PDF conversion, OCR, text/table extraction, PII redaction, watermarking, digital signatures, and API credit checks via built-in `nutrient_*` tools. Triggers on OpenClaw tool names (`nutrient_convert_to_pdf`, `nutrient_extract_text`, etc.), "OpenClaw plugin", "Nutrient OpenClaw", and document-processing requests in OpenClaw chats. For non-OpenClaw environments, use the Universal Nutrient Document Processing skill instead.
+description: >-
+  OpenClaw-native PDF/document processing skill for Nutrient DWS. Best for
+  OpenClaw users who need PDF conversion, OCR, text/table extraction, PII
+  redaction, watermarking, digital signatures, and API credit checks via built-in
+  `nutrient_*` tools. Triggers on OpenClaw tool names
+  (`nutrient_convert_to_pdf`, `nutrient_extract_text`, etc.), "OpenClaw plugin",
+  "Nutrient OpenClaw", and document-processing requests in OpenClaw chats. Files
+  are processed by Nutrient DWS over the network, so use it only when
+  third-party document processing is acceptable. For non-OpenClaw environments,
+  use the Universal Nutrient Document Processing skill instead.
 homepage: https://www.nutrient.io/api/
-metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "📄",
-        "requires":
-          {
-            "config":
-              ["plugins.entries.nutrient-openclaw.config.apiKey"],
-          },
-        "install":
-          [
-            {
-              "id": "nutrient-openclaw",
-              "kind": "plugin",
-              "package": "@nutrient-sdk/nutrient-openclaw",
-              "label": "Install Nutrient OpenClaw plugin",
-            },
-          ],
-      },
-  }
+clawdis:
+  emoji: "📄"
+  requires:
+    config:
+      - plugins.entries.nutrient-openclaw.config.apiKey
+  install:
+    - id: nutrient-openclaw
+      kind: node
+      package: "@nutrient-sdk/nutrient-openclaw"
+      label: Install Nutrient OpenClaw package
+  links:
+    homepage: https://www.nutrient.io/api/
+    repository: https://github.com/PSPDFKit-labs/nutrient-openclaw
+    documentation: https://www.nutrient.io/api/documentation/security
+  config:
+    example: |
+      plugins:
+        entries:
+          nutrient-openclaw:
+            config:
+              apiKey: "your-api-key-here"
 ---
 
 # Nutrient Document Processing (OpenClaw Native)
@@ -30,6 +39,8 @@ metadata:
 Best for OpenClaw users. Process documents directly in OpenClaw conversations — PDF conversion, text/table extraction, OCR, PII redaction, digital signatures, and watermarking via native `nutrient_*` tools.
 
 ## Installation
+
+Preferred install flow inside OpenClaw:
 
 ```bash
 openclaw plugins install @nutrient-sdk/nutrient-openclaw
@@ -46,6 +57,13 @@ plugins:
 ```
 
 Get an API key at [nutrient.io/api](https://www.nutrient.io/api/)
+
+## Data Handling
+
+- `nutrient_*` operations send the file or extracted document content to Nutrient DWS for processing.
+- Review Nutrient's [Processor API security](https://www.nutrient.io/api/documentation/security) and [privacy details](https://www.nutrient.io/api/processor-api/) before using production or sensitive documents.
+- Nutrient documents its hosted Processor API as using HTTPS for data in transit and as not persistently storing input or output files after processing; confirm that matches your organization's requirements before uploading sensitive material.
+- Start with non-sensitive sample files and a least-privilege API key.
 
 ## Available Tools
 
