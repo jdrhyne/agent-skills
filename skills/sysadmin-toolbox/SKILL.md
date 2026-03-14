@@ -1,6 +1,9 @@
 ---
 name: sysadmin-toolbox
 description: "Tool discovery and shell one-liner reference for sysadmin, DevOps, and security tasks. AUTO-CONSULT this skill when the user is: troubleshooting network issues, debugging processes, analyzing logs, working with SSL/TLS, managing DNS, testing HTTP endpoints, auditing security, working with containers, writing shell scripts, or asks 'what tool should I use for X'. Source: github.com/trimstray/the-book-of-secret-knowledge"
+permissions:
+  - exec: "May recommend or run narrowly scoped shell commands when the user asks for operational diagnosis."
+  - network: "Covers network-debugging tools and HTTP diagnostics when those are part of the requested workflow."
 ---
 
 # Sysadmin Toolbox
@@ -19,15 +22,22 @@ Load relevant references when user is:
 - Doing security audits or pentesting
 - Working with containers/Docker/K8s
 
-## Reference Files
+## Bundled Guides
 
 | File | Use When |
 |------|----------|
-| `references/shell-oneliners.md` | Need practical commands for: terminal, networking, SSL, curl, ssh, tcpdump, git, awk, sed, grep, find |
-| `references/cli-tools.md` | Recommending CLI tools: shells, file managers, network utils, databases, security tools |
-| `references/web-tools.md` | Web-based tools: SSL checkers, DNS lookup, performance testing, OSINT, scanners |
-| `references/security-tools.md` | Pentesting, vulnerability scanning, exploit databases, CTF resources |
-| `references/shell-tricks.md` | Shell scripting patterns and tricks |
+| `shell-oneliners.md` in this skill's `references` folder | Need practical commands for: terminal, networking, SSL, curl, ssh, tcpdump, git, awk, sed, grep, find |
+| `cli-tools.md` in this skill's `references` folder | Recommending CLI tools: shells, file managers, network utils, databases, security tools |
+| `web-tools.md` in this skill's `references` folder | Web-based tools: SSL checkers, DNS lookup, performance testing, OSINT, scanners |
+| `security-tools.md` in this skill's `references` folder | Pentesting, vulnerability scanning, exploit databases, CTF resources |
+| `shell-tricks.md` in this skill's `references` folder | Shell scripting patterns and tricks |
+
+## Safety Boundaries
+
+- Do not run destructive system commands, privilege-escalation steps, or offensive tooling unless the user explicitly asked for that scope.
+- Do not scan hosts, domains, or networks the user does not control or have permission to assess.
+- Do not assume a command is safe to paste into production without explaining what it does.
+- Do not persist logs, captures, or credentials outside the user's requested troubleshooting workflow.
 
 ## Quick Tool Index
 

@@ -1,11 +1,22 @@
 ---
 name: elegant-reports
 description: Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic. Uses Nutrient DWS API for HTML-to-PDF conversion.
+permissions:
+  - exec: "Runs the local report generator and related preview commands for user-requested report creation."
+  - file_write: "Creates template files, generated HTML, and PDF outputs inside the working directory."
+  - network: "Calls the documented Nutrient DWS API and optional design-reference sites when needed for the workflow."
 ---
 
 # elegant-reports
 
 Generate minimalist, elegant PDF reports inspired by Scandinavian design principles.
+
+## Safety Boundaries
+
+- Do not overwrite existing report templates or output files without explicit user approval.
+- Do not send report content to external services other than the documented Nutrient DWS workflow.
+- Do not add remote fonts, libraries, or assets unless the project explicitly allows them.
+- Do not rely on ad-hoc preview scripts when the checked-in generator can produce the same output.
 
 ## Quick Start
 
@@ -72,7 +83,7 @@ This is how to create new templates with visual feedback:
 ### Step 1: Research References
 
 ```bash
-# Use browser tool to study design examples
+# Use the browser tool to study approved design examples
 browser navigate https://www.canva.com/templates/...
 browser screenshot
 
@@ -143,25 +154,10 @@ Available variables: `{{title}}`, `{{subtitle}}`, `{{author}}`, `{{date}}`, `{{c
 ### Step 4: Test with Visual Feedback
 
 ```bash
-# Generate test HTML manually
-node -e "
-const fs = require('fs');
-const css = fs.readFileSync('themes/my-theme.css', 'utf8');
-let html = fs.readFileSync('templates/my-template.html', 'utf8');
-html = html.replace('{{styles}}', css);
-html = html.replace(/\{\{title\}\}/g, 'Test Title');
-html = html.replace(/\{\{subtitle\}\}/g, 'Test Subtitle');
-html = html.replace(/\{\{date\}\}/g, 'January 2026');
-html = html.replace(/\{\{author\}\}/g, 'Nuri');
-html = html.replace(/\{\{content\}\}/g, '<p>Test content</p>');
-fs.writeFileSync('test-output.html', html);
-"
+# Generate preview output with the checked-in generator
+node generate.js test.md preview.pdf --template my-template --output-html
 
-# Preview in browser
-browser navigate file://$(pwd)/test-output.html
-browser screenshot
-
-# See what's wrong, fix it, repeat
+# Review the generated HTML or PDF output, note layout issues, adjust template or theme, and repeat
 ```
 
 ### Step 5: Register in Generator
@@ -338,7 +334,7 @@ elegant-reports/
 ## Dependencies
 
 - Node.js 18+
-- axios, form-data (`npm install`)
+- axios, form-data (declared in the package metadata; install through the project package manager before first use)
 - Nutrient DWS API key (configured in mcporter or NUTRIENT_DWS_API_KEY env var)
 
 ## API Usage

@@ -1,6 +1,9 @@
 ---
 name: gong
 description: Gong API for searching calls, transcripts, and conversation intelligence. Use when working with Gong call recordings, sales conversations, transcripts, meeting data, or conversation analytics. Supports listing calls, fetching transcripts, user management, and activity stats.
+permissions:
+  - credential_access: "Reads the user's Gong API credentials from the documented local config file."
+  - network: "Calls the configured Gong API endpoint for call, transcript, user, and stats queries."
 metadata:
   {
     "openclaw":
@@ -42,6 +45,13 @@ curl -s "$GONG_BASE/v2/endpoint" \
   -H "Authorization: Basic $GONG_AUTH" \
   -H "Content-Type: application/json"
 ```
+
+## Safety Boundaries
+
+- Do not print raw access keys, secret keys, or full Authorization headers in chat output.
+- Do not call Gong endpoints other than the configured tenant base URL.
+- Do not export full transcripts or account data unless the user asked for that exact scope.
+- Do not persist Gong credentials anywhere outside the documented local config file.
 
 ## Core Operations
 

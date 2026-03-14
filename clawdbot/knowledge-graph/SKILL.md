@@ -2,276 +2,115 @@
 name: knowledge-graph
 description: Three-Layer Memory System — automatic fact extraction, entity-based knowledge graph, and weekly synthesis. Manages life/areas/ entities with atomic facts and living summaries.
 metadata: {"version":"1.1.0","openclaw":{"emoji":"🧠"}}
+permissions:
+  - exec: "Uses local filesystem commands when creating entity folders or scheduled knowledge-graph jobs."
+  - file_write: "Appends facts, summaries, and daily-note synthesis inside the workspace knowledge graph."
 ---
 
 # Knowledge Graph Skill
 
-Manages a Three-Layer Memory System for compounding knowledge across sessions.
-
-## Architecture
-
-### The Three Layers
-
-1. **Entity Knowledge** (`life/areas/`) — Structured facts about people, companies, and projects stored as atomic JSONL entries with living summaries
-2. **Daily Notes** (`memory/YYYY-MM-DD.md`) — Session logs, decisions, and events captured chronologically
-3. **Persistent Memory** (`MEMORY.md` or equivalent) — High-level patterns, preferences, and agent-wide context
-
-The knowledge graph (Layer 1) is the durable, structured layer. Daily notes feed it; synthesis distills it.
-
-### The Compounding Flywheel
-
-```
-Conversations → Daily Notes → Fact Extraction (cron) → Entity Facts
-                                                            ↓
-                              Weekly Synthesis (cron) → Living Summaries
-                                                            ↓
-                                          Richer Context → Better Conversations
-```
-
-Every conversation makes your agent smarter. Facts compound. Summaries stay fresh. Context improves over time.
+Maintain a lightweight, append-only entity graph that compounds durable facts across sessions.
 
 ## When to Use
 
-- **Fact Extraction** (cron): Extract durable facts from recent conversations
-- **Weekly Synthesis** (cron): Rewrite summaries, prune stale facts
-- **Entity Lookup**: When any agent needs context about a person, company, or project
-- **Manual**: User says "remember that...", "update X's info", "what do we know about Y"
+- Extract durable facts from recent work or conversation history
+- Rewrite entity summaries from active facts
+- Answer "what do we know about X?" without reopening large transcripts
+- Keep shared context for people, companies, and projects inside the workspace
 
-## Directory Structure
+## Data Model
 
-```
+Store the graph under:
+
+```text
 <workspace>/life/areas/
-├── people/<slug>/       → summary.md + facts.jsonl
-├── companies/<slug>/    → summary.md + facts.jsonl
-└── projects/<slug>/     → summary.md + facts.jsonl
+  people/<slug>/
+  companies/<slug>/
+  projects/<slug>/
 ```
 
-## Fact Schema (JSONL — one object per line)
+Each entity folder should contain:
+
+- `summary.md` for the short, current snapshot
+- `facts.jsonl` for atomic, append-only facts
+
+Use one JSON object per line:
 
 ```json
 {
   "id": "<slug>-NNN",
-  "fact": "The actual fact in plain English",
+  "fact": "Plain-English fact",
   "category": "relationship|milestone|status|preference|context|decision",
   "ts": "YYYY-MM-DD",
   "source": "conversation|manual|inference",
   "status": "active|superseded",
-  "supersedes": "<id>"
+  "supersedes": "<older-id>"
 }
 ```
 
-### Rules
+## Fact Rules
 
-1. **Append-only** — never edit or delete lines in facts.jsonl
-2. **Supersede, don't delete** — when a fact changes, add a new fact with `"supersedes": "<old-id>"` and mark the old fact's status as `"superseded"` (edit that one line)
-3. **Auto-increment IDs** — `<slug>-001`, `<slug>-002`, etc.
-4. **Be atomic** — one fact per entry, not paragraphs
-5. **Skip ephemera** — no "user said hi", no transient chat
+- Keep facts atomic. One durable fact per entry.
+- Append new facts instead of rewriting history.
+- When something changes, add a new fact and mark the old one as superseded.
+- Skip ephemera, greetings, speculation, and low-value chatter.
+- Check existing facts before adding duplicates.
 
-### What Qualifies as a Durable Fact
+Durable facts usually include:
 
-✅ Extract:
-- Relationship changes (new job, new team, promotions)
-- Life milestones (moved cities, had a baby, started a project)
-- Status changes (left company, started freelancing)
-- Stated preferences ("I prefer X over Y")
-- Key decisions ("decided to use Rust for the backend")
-- Important context ("allergic to shellfish", "works night shifts")
+- role or relationship changes
+- key decisions
+- long-lived preferences
+- major project milestones
+- stable operating context
 
-❌ Skip:
-- Casual conversation, jokes, greetings
-- Temporary states ("feeling tired today")
-- Already-known facts (check existing facts first)
-- Vague or uncertain information
+## Workflows
 
-## Task: Fact Extraction (Cron — Every 4 Hours)
+### Fact Extraction
 
-```
-1. Read today's daily note: memory/YYYY-MM-DD.md
-2. Read recent conversation context (last few hours)
-3. For each durable fact found:
-   a. Determine entity type (person/company/project) and slug
-   b. Create entity folder if new: mkdir -p life/areas/<type>/<slug>
-   c. Check existing facts.jsonl — skip if already known
-   d. If fact contradicts existing: supersede the old one
-   e. Append new fact to facts.jsonl
-4. Log extraction count to daily note
-```
+1. Read the recent daily note and the recent conversation window.
+2. Identify durable facts worth preserving.
+3. Resolve entity type and slug.
+4. Create the entity folder if it does not exist.
+5. Append new facts to `facts.jsonl`.
+6. Note extraction activity in the daily note if the workspace uses one.
 
-**Cost target**: Use the cheapest available model. Should cost < $0.01/day.
+### Weekly Synthesis
 
-## Task: Weekly Synthesis (Sunday Cron)
+1. List entities changed during the week.
+2. Load active facts only.
+3. Rewrite `summary.md` in 3 to 8 concise lines.
+4. Ensure contradicted facts are marked superseded.
+5. Record a short synthesis note in the daily log if applicable.
 
-```
-1. List all entities in life/areas/
-2. For each entity with facts modified this week:
-   a. Load all facts from facts.jsonl
-   b. Filter to status: "active" only
-   c. Write a new summary.md (3-8 lines):
-      - Who/what is this entity
-      - Current relationship/status
-      - Key active facts
-      - Last updated date
-   d. Mark any contradicted facts as superseded
-3. Produce a brief synthesis report in daily note
-```
+### Entity Lookup
 
-## Task: Entity Lookup
+1. Read `summary.md` first.
+2. Open `facts.jsonl` only if the summary is stale or the user asked for detail.
+3. Fall back to broader memory search only when the entity is missing from the graph.
 
-When an agent needs context about an entity:
+## Low-Token Recall
 
-```
-1. Check life/areas/<type>/<slug>/summary.md first (cheap)
-2. Only load facts.jsonl if summary is stale or more detail needed
-3. Use memory_search as fallback for entities not yet in the graph
-```
+Recall should be triggered, not automatic.
 
-## Low-token Recall Policy
-
-To minimize token usage, recall should be **triggered**, not automatic.
-
-### Rules
-
-1. **Only recall on triggers:**
-   - Proper nouns (names of people, companies, projects you track)
-   - Explicit recall phrases: "remember", "recall", "what do we know about"
-   - Project keywords that match entity slugs
-
-2. **Inject summary.md only** (max 5 lines) — never inject facts.jsonl unless:
-   - User explicitly asks for details/specifics
-   - Summary is stale or missing
-   - Contradictory information needs resolution
-
-3. **Use a single profile summary** when the topic is preferences or planning
-
-### Why This Matters
-
-- **No recall unless triggered** — most messages skip recall entirely
-- **Summaries only** — very short injections (5 lines vs potentially hundreds of facts)
-- **No raw facts unless requested** — keeps context window lean
-
-### Add to AGENTS.md
-
-```markdown
-### Low-token Recall Policy
-- Only recall on triggers (proper nouns, "remember/recall", or project keywords).
-- Inject summary.md only (max 5 lines); never inject facts.jsonl unless asked.
-- Use a single profile summary when preferences/planning are the topic.
-```
-
-### Add to HEARTBEAT.md
-
-```markdown
-## Low-token Recall (Rule)
-- [ ] Only recall on triggers (proper nouns, "remember/recall", project keywords)
-- [ ] Inject summary.md only (max 5 lines) unless user explicitly asks for details
-```
-
-## Creating New Entities
-
-When you encounter a new person/company/project worth tracking:
-
-```bash
-# Create structure
-mkdir -p life/areas/people/alice
-
-# Write initial fact
-echo '{"id":"alice-001","fact":"Frontend engineer at Acme Corp, works on the design system","category":"context","ts":"2026-01-15","source":"conversation","status":"active"}' > life/areas/people/alice/facts.jsonl
-
-# Write initial summary
-cat > life/areas/people/alice/summary.md << 'EOF'
-# Alice
-Frontend engineer at Acme Corp.
-Works on the design system team.
-_Last updated: 2026-01-15_
-EOF
-```
-
-## Integration with Other Layers
-
-- **Layer 2 (Daily Notes)** → Source material for fact extraction
-- **Layer 3 (MEMORY.md)** → Patterns/preferences stay there; entity facts come here
-- **memory_search** → Indexes summaries for semantic lookup
-
----
+- Recall when the user names a tracked person, company, or project.
+- Recall when the user explicitly asks to remember, recall, or summarize prior context.
+- Inject only the short summary by default.
+- Avoid loading raw facts unless the user asked for specifics or contradictions need resolution.
 
 ## Setup
 
-### 1. Create Directory Structure
+Create the core directories once:
 
 ```bash
-mkdir -p life/areas/people
-mkdir -p life/areas/companies
-mkdir -p life/areas/projects
+mkdir -p life/areas/people life/areas/companies life/areas/projects
 ```
 
-Optionally create a `life/README.md` explaining the structure for your own reference.
+If multiple agents share one workspace, point them at the same `life/` directory so they operate on the same entity store.
 
-### 2. Add to AGENTS.md
+## Safety Boundaries
 
-Add this block to your workspace's `AGENTS.md`:
-
-```markdown
-## Knowledge Graph — Three-Layer Memory
-
-### Layer 1: Entity Knowledge (`life/areas/`)
-- `people/` — Person entities
-- `companies/` — Company/org entities
-- `projects/` — Project entities
-
-Each entity has: `summary.md` (quick context) + `facts.jsonl` (atomic facts).
-
-**Retrieval order:** summary.md first → facts.jsonl only if more detail needed.
-
-**Rules:**
-- Save durable facts to the relevant entity's `facts.jsonl` (append-only JSONL)
-- Never delete facts — supersede instead (`"status":"superseded","supersedes":"old-id"`)
-- When encountering a new notable entity, create its folder + initial fact + summary
-- Cron handles periodic extraction and weekly synthesis — manual saves welcome too
-
-See `skills/knowledge-graph/SKILL.md` and `life/README.md` for full conventions.
-```
-
-### 3. Create Cron Jobs
-
-Set up two cron jobs in your OpenClaw config:
-
-**Fact Extraction** — runs every 4 hours:
-```yaml
-crons:
-  - name: fact-extraction
-    schedule: "0 */4 * * *"
-    task: >
-      Run the fact extraction task from skills/knowledge-graph/SKILL.md.
-      Read today's daily notes and recent conversations.
-      Extract durable facts into life/areas/ entities.
-      Use the cheapest available model.
-```
-
-**Weekly Synthesis** — runs every Sunday:
-```yaml
-  - name: weekly-synthesis
-    schedule: "0 9 * * 0"
-    task: >
-      Run the weekly synthesis task from skills/knowledge-graph/SKILL.md.
-      Rewrite summaries for all entities modified this week.
-      Mark contradicted facts as superseded.
-      Log a synthesis report to today's daily note.
-```
-
-### 4. Multi-Agent Setups (Optional)
-
-If you run multiple agents that share a workspace, symlink `life/` so all agents read from the same knowledge graph:
-
-```bash
-# From each agent's workspace
-ln -s /path/to/primary-workspace/life ./life
-```
-
-All agents will read/write to the same entity store. The cron jobs only need to run from one agent.
-
----
-
-## Links
-
-- [GitHub](https://github.com/jdrhyne/agent-skills/tree/main/clawdbot/knowledge-graph)
+- Do not store sensitive secrets, credentials, or highly personal data unless the user explicitly asked for it.
+- Do not create entities or facts for casual chat that has no durable value.
+- Do not inject the graph into every conversation by default.
+- Do not delete historical facts; supersede them with a newer fact instead.

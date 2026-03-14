@@ -1,11 +1,17 @@
 ---
 name: senior-engineering
-description: Engineering principles for building software like a senior engineer. Load when tackling non-trivial development work, architecting systems, reviewing code, or orchestrating multi-agent builds. Covers planning, execution, quality gates, and LLM-specific patterns.
+description: Engineering principles for building software like a senior engineer. Load when tackling non-trivial development work, architecting systems, reviewing code, or orchestrating multi-agent builds. Covers planning, delivery, quality gates, and LLM-specific patterns.
 ---
 
 # Senior Engineering Principles
 
 Guidelines for building software with the judgment and discipline of a senior engineer.
+
+## Safety Boundaries
+
+- Do not treat these principles as permission to skip user approval for destructive or high-risk changes.
+- Do not expand scope beyond the user's request just because a broader rewrite seems cleaner.
+- Do not invent validation results; report what was actually checked and what remains unverified.
 
 ## Before Writing Code
 

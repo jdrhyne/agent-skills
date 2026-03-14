@@ -2,6 +2,11 @@
 name: nudocs
 description: Upload, edit, and export documents via Nudocs.ai. Use when creating shareable document links for collaborative editing, uploading markdown/docs to Nudocs for rich editing, or pulling back edited content. Triggers on "send to nudocs", "upload to nudocs", "edit in nudocs", "pull from nudocs", "get the nudocs link", "show my nudocs documents".
 homepage: https://nudocs.ai
+permissions:
+  - exec: "Runs the Nudocs CLI for upload, list, link, pull, and delete operations."
+  - file_write: "Creates or downloads local document files only for the user-requested Nudocs workflow."
+  - credential_access: "Reads the Nudocs API key from the documented env var or local config path."
+  - network: "Calls Nudocs.ai through the documented CLI and service endpoints."
 metadata:
   {
     "openclaw":
@@ -34,10 +39,7 @@ Upload documents to Nudocs.ai for rich editing, get shareable links, and pull ba
 
 ## Setup
 
-1. Install the CLI:
-```bash
-npm install -g @nutrient-sdk/nudocs-cli
-```
+1. Install the CLI using the repo's declared install metadata or your preferred package manager before first use.
 
 2. Get your API key from https://nudocs.ai (click "Integration" after signing in)
 
@@ -83,7 +85,7 @@ nudocs config                     # Show configuration
 | Simple text/code content | `md` |
 | Final delivery/sharing | `pdf` |
 
-See `references/formats.md` for full format support.
+See `formats.md` in this skill's `references` folder for full format support.
 
 ## Natural Language Triggers
 
@@ -127,7 +129,7 @@ Before uploading, ensure good structure:
 - Appropriate list formatting
 - Concise paragraphs (3-5 sentences)
 
-See `references/document-design.md` for templates and guidelines.
+See `document-design.md` in this skill's `references` folder for templates and guidelines.
 
 ## Example Session
 
@@ -160,5 +162,12 @@ Agent:
 ## Links
 
 - CLI: https://github.com/PSPDFKit/nudocs-cli (`@nutrient-sdk/nudocs-cli` on npm)
-- MCP Server: https://github.com/PSPDFKit/nudocs-mcp-server
+- MCP integration repo: https://github.com/PSPDFKit/nudocs-mcp-server
 - Nudocs: https://nudocs.ai
+
+## Safety Boundaries
+
+- Do not upload sensitive documents unless the user confirmed that third-party processing is acceptable.
+- Do not print API keys, edit links meant to stay private, or document contents the user did not ask to expose.
+- Do not delete documents from Nudocs without explicit confirmation.
+- Do not assume the default download format is correct; confirm the output format when it matters.

@@ -1,6 +1,9 @@
 ---
 name: google-ads
-description: "Query, audit, and optimize Google Ads campaigns. Supports two modes: (1) API mode for bulk operations with google-ads Python SDK, (2) Browser automation mode for users without API access - just attach a browser tab to ads.google.com. Use when asked to check ad performance, pause campaigns/keywords, find wasted spend, audit conversion tracking, or optimize Google Ads accounts."
+description: "Query, audit, and optimize Google Ads campaigns. Supports two modes: (1) API mode for bulk operations with the google-ads Python SDK, (2) attached-browser mode for users without API access. Use when asked to check ad performance, pause campaigns or keywords, find wasted spend, audit conversion tracking, or optimize Google Ads accounts."
+permissions:
+  - credential_access: "Reads locally configured Google Ads API credentials when the user wants API mode."
+  - network: "Uses the Google Ads API or the attached browser session against ads.google.com."
 metadata:
   {
     "openclaw":
@@ -17,7 +20,7 @@ metadata:
 
 # Google Ads Skill
 
-Manage Google Ads accounts via API or browser automation.
+Manage Google Ads accounts via API or an attached browser session.
 
 ## Mode Selection
 
@@ -31,11 +34,11 @@ Manage Google Ads accounts via API or browser automation.
 ls ~/.google-ads.yaml 2>/dev/null || ls google-ads.yaml 2>/dev/null
 ```
 
-If no config found, ask: "Do you have Google Ads API credentials, or should I use browser automation?"
+If no config found, ask: "Do you have Google Ads API credentials, or should I use the attached browser session?"
 
 ---
 
-## Browser Automation Mode (Universal)
+## Browser Mode (Universal)
 
 **Requirements:** User logged into ads.google.com in browser
 
@@ -79,13 +82,13 @@ If no config found, ask: "Do you have Google Ads API credentials, or should I us
 4. File downloads to user's Downloads folder
 ```
 
-**For detailed browser selectors:** See `references/browser-workflows.md`
+**For detailed browser selectors:** Load `browser-workflows.md` from this skill's `references` folder.
 
 ---
 
 ## API Mode (Power Users)
 
-**Requirements:** Google Ads API developer token + OAuth credentials
+**Requirements:** Google Ads API developer token plus locally configured client credentials
 
 ### Setup Check
 ```bash
@@ -142,7 +145,7 @@ for keyword_id in keywords_to_pause:
 service.mutate_ad_group_criteria(customer_id=customer_id, operations=operations)
 ```
 
-**For full API reference:** See `references/api-setup.md`
+**For full API reference:** Load `api-setup.md` from this skill's `references` folder.
 
 ---
 
@@ -179,6 +182,13 @@ When reporting findings, use tables:
 ---
 
 ## Troubleshooting
+
+## Safety Boundaries
+
+- Do not pause campaigns, keywords, or budgets without explicit confirmation from the user.
+- Do not export or summarize account data beyond the account, date range, and entities the user requested.
+- Do not expose API credentials, downloaded reports, or account identifiers in chat output.
+- Do not use browser mode unless the user has attached the correct logged-in ads.google.com session.
 
 ### Browser Mode Issues
 - **Can't see data**: Check user is on correct account (top right account selector)

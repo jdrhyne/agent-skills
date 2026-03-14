@@ -1,6 +1,11 @@
 ---
 name: last30days
 description: Research any topic from the last 30 days on Reddit + X + Web, synthesize findings, and write copy-paste-ready prompts. Use when the user wants recent social/web research on a topic, asks "what are people saying about X", or wants to learn current best practices. Requires OPENAI_API_KEY and/or XAI_API_KEY for full Reddit+X access, falls back to web search.
+permissions:
+  - exec: "Runs the local research script when the user asks for last-30-days research."
+  - file_write: "Creates the optional local config file only when the user asks to add API keys."
+  - credential_access: "Reads the optional API keys from the documented local config file for Reddit and X research."
+  - network: "Queries Reddit, X, and web search sources as part of the requested research workflow."
 ---
 
 # last30days: Research Any Topic from the Last 30 Days
@@ -77,9 +82,16 @@ echo "Edit to add your API keys for enhanced research."
 
 **DO NOT stop if no keys are configured.** Proceed with web-only mode.
 
+## Safety Boundaries
+
+- Do not create or edit the local `.env` file unless the user asked to configure API keys.
+- Do not print secret values, bearer tokens, or local config contents in chat output.
+- Do not present stale prior knowledge as current research; use the gathered sources for the final synthesis.
+- Do not claim social-platform coverage when the skill had to fall back to web-only mode.
+
 ---
 
-## Research Execution
+## Research Workflow
 
 **IMPORTANT: The script handles API key detection automatically.** Run it and check the output to determine mode.
 

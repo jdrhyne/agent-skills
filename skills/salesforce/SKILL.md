@@ -3,13 +3,24 @@ name: salesforce
 description: "Query and manage Salesforce CRM data via the Salesforce CLI (`sf`). Run SOQL/SOSL queries, inspect object schemas, create/update/delete records, bulk import/export, execute Apex, deploy metadata, and make raw REST API calls."
 homepage: https://developer.salesforce.com/tools/salesforcecli
 metadata: {"clawdbot":{"emoji":"☁️","requires":{"bins":["sf"]},"install":[{"id":"npm","kind":"node","package":"@salesforce/cli","bins":["sf"],"label":"Install Salesforce CLI (npm)"}]}}
+permissions:
+  - exec: "Runs the Salesforce CLI for authenticated CRM queries, metadata inspection, and administrative tasks."
+  - file_write: "Writes query exports or import files only when the user asks for saved artifacts."
+  - network: "Uses the authenticated Salesforce org connection through the Salesforce CLI."
 ---
 
 # Salesforce Skill
 
 Use the Salesforce CLI (`sf`) to interact with Salesforce orgs. The CLI must be authenticated before use. Always add `--json` for structured output.
 
-If the `sf` binary is not available, install it via npm (`npm install -g @salesforce/cli`) or download it from https://developer.salesforce.com/tools/salesforcecli. After installing, authenticate immediately with `sf org login web` to connect to a Salesforce org.
+If the `sf` binary is not available, stop and ask the user to install the Salesforce CLI using the repo's declared install metadata or the official Salesforce CLI guide. After the CLI is available, authenticate with `sf org login web` before touching org data.
+
+## Safety Boundaries
+
+- Do not create, update, delete, deploy, or execute Apex without explicit user confirmation.
+- Do not reveal access tokens, auth URLs, refresh tokens, or verbose org-display output in chat.
+- Do not export data to files unless the user asked for a saved artifact or bulk workflow.
+- Do not target a production org by default when sandbox or staging access is available.
 
 ## Authentication and Org Management
 

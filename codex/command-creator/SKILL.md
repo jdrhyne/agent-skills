@@ -1,6 +1,9 @@
 ---
 name: command-creator
 description: This skill should be used when creating a Claude Code slash command. Use when users ask to "create a command", "make a slash command", "add a command", or want to document a workflow as a reusable command. Essential for creating optimized, agent-executable slash commands with proper structure and best practices.
+permissions:
+  - exec: "Runs lightweight local commands such as git checks or directory creation while building the command."
+  - file_write: "Creates or updates the requested slash-command file in the chosen commands directory."
 ---
 
 # Command Creator
@@ -30,11 +33,18 @@ Invoke this skill when users:
 
 This skill includes reference documentation for detailed guidance:
 
-- **references/patterns.md** - Command patterns (workflow automation, iterative fixing, agent delegation, simple execution)
-- **references/examples.md** - Real command examples with full source (submit-stack, ensure-ci, create-implementation-plan)
-- **references/best-practices.md** - Quality checklist, common pitfalls, writing guidelines, template structure
+- **patterns.md** in this skill's `references` folder - Command patterns (workflow automation, iterative fixing, agent delegation, simple execution)
+- **examples.md** in this skill's `references` folder - Real command examples with full source (submit-stack, ensure-ci, create-implementation-plan)
+- **best-practices.md** in this skill's `references` folder - Quality checklist, common pitfalls, writing guidelines, template structure
 
 Load these references as needed when creating commands to understand patterns, see examples, or ensure quality.
+
+## Safety Boundaries
+
+- Do not create or overwrite commands outside the user-chosen project or global commands directory.
+- Do not include destructive steps, hidden network calls, or irreversible operations unless the user asked for them explicitly.
+- Do not assume a command should be global when the project directory is the safer default.
+- Do not read unrelated files for context when the command can be built from the request and this skill's bundled guides.
 
 ## Command Structure Overview
 
@@ -69,7 +79,7 @@ Report the chosen location to the user before proceeding.
 
 ### Step 2: Show Command Patterns
 
-Help the user understand different command types. Load **references/patterns.md** to see available patterns:
+Help the user understand different command types. Load **patterns.md** from this skill's `references` folder to see available patterns:
 
 - **Workflow Automation** - Analyze → Act → Report (e.g., submit-stack)
 - **Iterative Fixing** - Run → Parse → Fix → Repeat (e.g., ensure-ci)
@@ -137,7 +147,7 @@ Ask:
 
 ### Step 4: Generate Optimized Command
 
-Create the command file with agent-optimized instructions. Load **references/best-practices.md** for:
+Create the command file with agent-ready instructions. Load **best-practices.md** from this skill's `references` folder for:
 
 - Template structure
 - Best practices for agent execution
@@ -183,9 +193,9 @@ If the user wants to test:
 
 **For detailed guidance, load the bundled references:**
 
-- Load **references/patterns.md** when designing the command workflow
-- Load **references/examples.md** to see how existing commands are structured
-- Load **references/best-practices.md** before finalizing to ensure quality
+- Load **patterns.md** from this skill's `references` folder when designing the command workflow
+- Load **examples.md** from this skill's `references` folder to see how existing commands are structured
+- Load **best-practices.md** from this skill's `references` folder before finalizing to ensure quality
 
 **Common patterns to remember:**
 

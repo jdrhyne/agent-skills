@@ -2,161 +2,55 @@
 name: Zendesk
 slug: zendesk
 version: 1.0.0
-homepage: https://clawic.com/skills/zendesk
-description: Manage Zendesk tickets, users, and support workflows with API integration and automation.
+description: Manage Zendesk tickets, users, and support workflows through the Zendesk API. Use when searching tickets, updating support state, checking users, or exporting queue data.
 changelog: Initial release with ticket management, user lookup, and workflow automation.
 metadata: {"clawdbot":{"emoji":"🎫","requires":{"bins":[],"env":["ZENDESK_SUBDOMAIN","ZENDESK_EMAIL","ZENDESK_TOKEN"]},"os":["linux","darwin","win32"]}}
+permissions:
+  - network: "Calls the authenticated Zendesk API for ticket, user, and search operations."
+  - file_write: "Writes exports only when the user asks for a saved report or dump."
 ---
 
-## Setup
+# Zendesk
 
-On first use, read `setup.md` for API credentials and workspace integration.
+Manage Zendesk tickets, users, and support workflows through the authenticated Zendesk API.
 
 ## When to Use
 
-User needs to interact with Zendesk: create or update tickets, search support history, check user details, or automate support workflows. Agent handles API operations, ticket management, and reporting.
+- search tickets or support history
+- create or update tickets
+- inspect user details
+- export queue data for analysis
+- summarize current support state
 
-## Architecture
+## Setup
 
-Memory at `~/zendesk/`. See `memory-template.md` for structure.
+Use these environment variables:
 
-```
-~/zendesk/
-├── memory.md        # Credentials + preferences + recent context
-├── templates/       # Saved ticket templates and macros
-└── exports/         # Report exports and ticket dumps
-```
+- `ZENDESK_SUBDOMAIN`
+- `ZENDESK_EMAIL`
+- `ZENDESK_TOKEN`
 
-## Quick Reference
+Build the Zendesk auth context from those variables and confirm access before trying ticket operations.
 
-| Topic | File |
-|-------|------|
-| Setup process | `setup.md` |
-| Memory template | `memory-template.md` |
-| API operations | `api-reference.md` |
-| Common issues | `troubleshooting.md` |
+## Workflow Rules
 
-## Core Rules
-
-### 1. Authenticate Before Operations
-Credentials from environment variables (ZENDESK_SUBDOMAIN, ZENDESK_EMAIL, ZENDESK_TOKEN) or `~/zendesk/memory.md`.
-```bash
-# Test auth
-curl -u "$ZENDESK_EMAIL/token:$ZENDESK_TOKEN" "https://$ZENDESK_SUBDOMAIN.zendesk.com/api/v2/users/me.json"
-```
-
-### 2. Search Before Create
-Always search existing tickets before creating new ones to avoid duplicates.
-```bash
-curl -u "$AUTH" "$BASE/search.json?query=type:ticket+subject:issue"
-```
-
-### 3. Use Views for Efficiency
-Don't list all tickets. Use views to get relevant subsets.
-| View | Use Case |
-|------|----------|
-| `/views/active` | Get available views |
-| `/views/{id}/tickets` | Tickets in specific view |
-| `/tickets/recent` | Recently updated |
-
-### 4. Preserve Ticket History
-When updating, add internal notes explaining changes. Never delete ticket data.
-
-### 5. Rate Limits
-Zendesk limits: 700 requests/minute (Enterprise), 200/minute (others). Add delays for bulk operations.
-
-### 6. Always Confirm Destructive Actions
-Before closing, merging, or deleting tickets, confirm with user and summarize what will happen.
+1. Search before creating a ticket to avoid duplicates.
+2. Use views or targeted search instead of listing entire queues.
+3. Add internal notes when changing status or ownership.
+4. Confirm destructive or customer-visible actions before sending them.
+5. Respect Zendesk rate limits during bulk work.
 
 ## Common Operations
 
-Set auth: `AUTH="$ZENDESK_EMAIL/token:$ZENDESK_TOKEN"` and `BASE="https://$ZENDESK_SUBDOMAIN.zendesk.com/api/v2"`
+- Search tickets by status, priority, assignee, or subject before creating a new one.
+- Create tickets with a clear subject, customer-visible comment, and correct priority.
+- Update status with an internal note that explains what changed and why.
+- Look up users by email before editing ownership, organization, or requester fields.
+- Export queue data only when the user explicitly asked for a saved report.
 
-### Create Ticket
-```bash
-curl -X POST "$BASE/tickets.json" -u "$AUTH" -H "Content-Type: application/json" \
-  -d '{"ticket":{"subject":"Issue","comment":{"body":"Description"},"priority":"normal"}}'
-```
+## Safety Boundaries
 
-### Update Ticket Status
-```bash
-curl -X PUT "$BASE/tickets/$ID.json" -u "$AUTH" -H "Content-Type: application/json" \
-  -d '{"ticket":{"status":"solved","comment":{"body":"Resolution","public":false}}}'
-```
-
-### Search Tickets
-```bash
-curl -u "$AUTH" "$BASE/search.json?query=type:ticket+status:open+priority:urgent"
-```
-
-### Get User Details
-```bash
-curl -u "$AUTH" "$BASE/users/search.json?query=email:user@example.com"
-```
-
-## Ticket Statuses
-
-| Status | Meaning | Next Actions |
-|--------|---------|--------------|
-| new | Unassigned | Assign, respond |
-| open | Being worked | Update, solve |
-| pending | Waiting on customer | Follow up, solve |
-| hold | Waiting internally | Unhold, update |
-| solved | Resolution provided | Close (auto after 4 days) |
-| closed | Final | Reopen creates new ticket |
-
-## Priorities
-
-| Priority | SLA Target | Use For |
-|----------|-----------|---------|
-| urgent | 1 hour | System down, revenue impact |
-| high | 4 hours | Major feature broken |
-| normal | 8 hours | Standard issues |
-| low | 24 hours | Questions, minor bugs |
-
-## Common Traps
-
-- **Auth format wrong** → Must be `email/token:API_TOKEN`, not just token
-- **Searching with special chars** → URL-encode queries
-- **Bulk updates failing** → Check rate limits, add 100ms delay
-- **Missing ticket fields** → Some fields require specific plans
-- **Pagination ignored** → Results capped at 100, use `next_page` URL
-
-## External Endpoints
-
-| Endpoint | Data Sent | Purpose |
-|----------|-----------|---------|
-| `https://{subdomain}.zendesk.com/api/v2/*` | Ticket/user data | All operations |
-
-No other data is sent externally.
-
-## Security & Privacy
-
-**Data that leaves your machine:**
-- Ticket content sent to Zendesk API
-- Search queries sent to Zendesk
-
-**Data that stays local:**
-- API credentials in ~/zendesk/memory.md
-- Exported reports in ~/zendesk/exports/
-
-**This skill does NOT:**
-- Store credentials in plain text outside ~/zendesk/
-- Send data to any service other than Zendesk
-- Access tickets without explicit user request
-
-## Trust
-
-By using this skill, ticket and user data is sent to Zendesk's API.
-Only install if you have authorized Zendesk API access.
-
-## Related Skills
-Install with `clawhub install <slug>` if user confirms:
-- `api` - REST API patterns
-- `customer-support` - Support best practices
-- `csv` - Export and analyze ticket data
-
-## Feedback
-
-- If useful: `clawhub star zendesk`
-- Stay updated: `clawhub sync`
+- Do not read credentials from ad hoc files, memory stores, or chat history; use only the documented environment variables.
+- Do not close, merge, delete, or publicly reply to tickets without explicit confirmation.
+- Do not export ticket or user data to files unless the user asked for a saved artifact.
+- Do not send Zendesk data to any service other than the authenticated Zendesk API.

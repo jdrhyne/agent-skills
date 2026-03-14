@@ -2,6 +2,10 @@
 name: context-recovery
 description: Automatically recover working context after session compaction or when continuation is implied but context is missing. Works across Discord, Slack, Telegram, Signal, and other supported channels.
 metadata: {"clawdbot":{"emoji":"🔄"}}
+permissions:
+  - exec: "Reads recent local session logs and memory files when recovery requires them."
+  - file_write: "Appends a recovered-context note to the daily memory file for continuity."
+  - network: "Reads recent channel history through the configured messaging integration for the active conversation."
 ---
 
 # Context Recovery
@@ -26,7 +30,7 @@ Automatically recover working context after session compaction or when continuat
 
 ---
 
-## Execution Protocol
+## Recovery Workflow
 
 ### Step 1: Detect Active Channel
 
@@ -35,7 +39,7 @@ Extract from runtime context:
 - `channelId` — the specific channel/conversation ID
 - `threadId` — for threaded conversations (Slack, Discord threads)
 
-### Step 2: Fetch Channel History (Adaptive Depth)
+### Step 2: Read Channel History (Adaptive Depth)
 
 **Initial fetch:**
 ```
@@ -49,19 +53,19 @@ message:read
 1. Parse timestamps from returned messages
 2. Calculate time span: `newest_timestamp - oldest_timestamp`
 3. If time span < 2 hours AND message count == limit:
-   - Fetch additional 50 messages (using `before` parameter if supported)
+   - Read an additional 50 messages (using `before` parameter if supported)
    - Repeat until time span ≥ 2 hours OR total messages ≥ 100
 4. Hard cap: 100 messages maximum (token budget constraint)
 
 **Thread-aware recovery (Slack/Discord):**
 ```
-# If threadId is present, fetch thread messages first
+# If threadId is present, read thread messages first
 message:read
   channel: <detected-channel>
   threadId: <thread-id>
   limit: 50
 
-# Then fetch parent channel for broader context
+# Then read the parent channel for broader context
 message:read
   channel: <detected-channel>
   channelId: <parent-channel-id>
@@ -75,7 +79,7 @@ message:read
 - Incomplete actions (promises made but not fulfilled)
 - Project identifiers and working directories
 
-### Step 3: Fetch Session Logs (if available)
+### Step 3: Read Session Logs (if available)
 
 ```bash
 # Find most recent session files for this agent
@@ -171,6 +175,13 @@ EOF
 ```
 
 This ensures context survives future compactions.
+
+## Safety Boundaries
+
+- Do not scan unrelated channels, projects, or workspaces when the active thread already gives enough context.
+- Do not overwrite memory files; append a short recovery note instead.
+- Do not persist secrets, tokens, or private message content that is not necessary for continuity.
+- Do not claim recovery is complete when the available history, logs, or memory sources are partial.
 
 ### Step 7: Respond with Context
 

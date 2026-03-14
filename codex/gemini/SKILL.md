@@ -1,6 +1,8 @@
 ---
 name: gemini
 description: Use when the user asks to run Gemini CLI for code review, plan review, or big context (>200k) processing. Ideal for comprehensive analysis requiring large context windows. Uses Gemini 3 Pro by default for state-of-the-art reasoning and coding.
+permissions:
+  - exec: "Runs the Gemini CLI only when the user explicitly asks to use Gemini."
 ---
 
 # Gemini Skill Guide
@@ -75,6 +77,13 @@ pkill -9 -f "gemini.*gemini-3-pro-preview"
 
 7. **After Gemini completes**, inform the user: "The Gemini analysis is complete. You can start a new Gemini session for follow-up analysis or continue exploring the findings."
 
+## Safety Boundaries
+
+- Do not run Gemini unless the user explicitly asked for Gemini or for a second-opinion review that justifies it.
+- Do not use `--approval-mode yolo` unless the task is non-interactive and the user approved high-autonomy execution.
+- Do not save reports or write files unless the user asked for an artifact.
+- Do not pass secrets, private keys, or unrelated workspace data into prompts.
+
 ### Quick Reference
 
 | Use case | Approval mode | Key flags |
@@ -94,10 +103,10 @@ pkill -9 -f "gemini.*gemini-3-pro-preview"
 
 | Model | Best for | Context window | Key features |
 | --- | --- | --- | --- |
-| `gemini-3-pro-preview` ⭐ | **Flagship model**: Complex reasoning, coding, agentic tasks | 1M input / 64k output | Vibe coding, 76.2% SWE-bench, $2-4/M input |
+| `gemini-3-pro-preview` ⭐ | **Flagship model**: Complex reasoning, coding, agentic tasks | 1M input / 64k output | Vibe coding, 76.2% SWE-bench |
 | `gemini-3-flash` | Sub-second latency, speed-critical applications | 1M input / 64k output | Distilled from 3 Pro, TPU-optimized |
 | `gemini-2.5-pro` | Legacy: Strong all-around performance | 1M input / 65k output | Thinking mode, mature stability |
-| `gemini-2.5-flash` | Legacy: Cost-efficient, high-volume tasks | 1M input / 65k output | Best price ($0.15/M), thinking mode |
+| `gemini-2.5-flash` | Legacy: Cost-efficient, high-volume tasks | 1M input / 65k output | Thinking mode |
 | `gemini-2.5-flash-lite` | Legacy: Fastest processing, high throughput | 1M input / 65k output | Maximum speed, minimal latency |
 
 **Gemini 3 Advantages**: 35% higher accuracy in software engineering, state-of-the-art on SWE-bench (76.2%), GPQA Diamond (91.9%), and WebDev Arena (1487 Elo). Knowledge cutoff: January 2025.
@@ -216,7 +225,7 @@ ps aux | grep gemini | grep -v grep
    - Use `gemini-2.5-flash` for cost-optimized high-volume processing
 4. **Leverage Gemini 3's strengths**: 35% better at software engineering tasks, exceptional at agentic workflows and vibe coding
 5. **Break down complex tasks**: Even with large context, structured analysis is more effective
-6. **Save findings**: Ask Gemini to output structured reports that can be saved for reference
+6. **Return structured findings**: Ask Gemini for markdown or JSON that can be quoted directly in the final answer
 
 ## CLI Version
 

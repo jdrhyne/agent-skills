@@ -1,6 +1,9 @@
 ---
 name: codex
 description: Use when the user asks to run Codex CLI (codex exec, codex resume) or references OpenAI Codex for code analysis, refactoring, or automated editing. Uses GPT-5.2 by default for state-of-the-art software engineering.
+permissions:
+  - exec: "Runs the Codex CLI only when the user explicitly asks to use Codex."
+  - file_write: "Allows Codex to update workspace files only for user-approved edit tasks."
 ---
 
 # Codex Skill Guide
@@ -21,6 +24,13 @@ description: Use when the user asks to run Codex CLI (codex exec, codex resume) 
 6. Run the command, capture stdout/stderr (filtered as appropriate), and summarize the outcome for the user.
 7. **After Codex completes**, inform the user: "You can resume this Codex session at any time by saying 'codex resume' or asking me to continue with additional analysis or changes."
 
+## Safety Boundaries
+
+- Do not run `codex exec` until the user has explicitly asked to use Codex for the task.
+- Do not select `--full-auto` or a broader sandbox mode than the task requires.
+- Do not overwrite user files, create commits, or perform destructive operations without explicit user approval.
+- Do not use networked or danger-full-access runs unless the user requested work that actually needs them.
+
 ### Quick Reference
 | Use case | Sandbox mode | Key flags |
 | --- | --- | --- |
@@ -34,9 +44,9 @@ description: Use when the user asks to run Codex CLI (codex exec, codex resume) 
 
 | Model | Best for | Context window | Key features |
 | --- | --- | --- | --- |
-| `gpt-5.2-max` | **Max model**: Ultra-complex reasoning, deep problem analysis | 400K input / 128K output | 76.3% SWE-bench, adaptive reasoning, $1.25/$10.00 |
-| `gpt-5.2` ⭐ | **Flagship model**: Software engineering, agentic coding workflows | 400K input / 128K output | 76.3% SWE-bench, adaptive reasoning, $1.25/$10.00 |
-| `gpt-5.2-mini` | Cost-efficient coding (4x more usage allowance) | 400K input / 128K output | Near SOTA performance, $0.25/$2.00 |
+| `gpt-5.2-max` | **Max model**: Ultra-complex reasoning, deep problem analysis | 400K input / 128K output | 76.3% SWE-bench, adaptive reasoning |
+| `gpt-5.2` ⭐ | **Flagship model**: Software engineering, agentic coding workflows | 400K input / 128K output | 76.3% SWE-bench, adaptive reasoning |
+| `gpt-5.2-mini` | Cost-efficient coding (4x more usage allowance) | 400K input / 128K output | Near SOTA performance |
 | `gpt-5.1-thinking` | Ultra-complex reasoning, deep problem analysis | 400K input / 128K output | Adaptive thinking depth, runs 2x slower on hardest tasks |
 
 **GPT-5.2 Advantages**: 76.3% SWE-bench (vs 72.8% GPT-5), 30% faster on average tasks, better tool handling, reduced hallucinations, improved code quality. Knowledge cutoff: September 30, 2024.
@@ -47,7 +57,7 @@ description: Use when the user asks to run Codex CLI (codex exec, codex resume) 
 - `medium` - Standard tasks (refactoring, code organization, feature additions, bug fixes)
 - `low` - Simple tasks (quick fixes, simple changes, code formatting, documentation)
 
-**Cached Input Discount**: 90% off ($0.125/M tokens) for repeated context, cache lasts up to 24 hours.
+**Cached Input Discount**: Cached context is substantially cheaper than first-pass context. Check current vendor pricing before quoting costs.
 
 ## Following Up
 - After every `codex` command, immediately use `AskUserQuestion` to confirm next steps, collect clarifications, or decide whether to resume with `codex exec resume --last`.

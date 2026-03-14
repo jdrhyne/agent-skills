@@ -2,6 +2,10 @@
 name: task-orchestrator
 description: Autonomous multi-agent task orchestration with dependency analysis, parallel tmux/Codex execution, and self-healing heartbeat monitoring. Use for large projects with multiple issues/tasks that need coordinated parallel execution.
 metadata: {"clawdbot":{"emoji":"🎭","requires":{"anyBins":["tmux","codex","gh"]}}}
+permissions:
+  - exec: "Runs local git, tmux, gh, and codex commands to coordinate isolated task workers."
+  - file_write: "Creates manifests, logs, and per-task working directories for the orchestration run."
+  - network: "Uses GitHub CLI and git remotes for issue metadata and repository operations."
 ---
 
 # Task Orchestrator
@@ -9,6 +13,13 @@ metadata: {"clawdbot":{"emoji":"🎭","requires":{"anyBins":["tmux","codex","gh"
 Autonomous orchestration of multi-agent builds using tmux + Codex with self-healing monitoring.
 
 **Load the senior-engineering skill alongside this one for engineering principles.**
+
+## Safety Boundaries
+
+- Do not launch parallel workers for tasks with overlapping write scope until the dependency is resolved.
+- Do not push branches, merge work, or self-heal by guessing when human review is required.
+- Do not store secrets in manifests, logs, prompts, or tmux pane captures.
+- Do not continue retrying a failing task indefinitely; stop and surface the blocker after bounded retries.
 
 ## Core Concepts
 

@@ -1,11 +1,22 @@
 ---
 name: gallery-scraper
-description: Bulk download images from login-protected gallery websites using browser automation. Use when asked to scrape, download, or save images from gallery pages that require authentication, extract full-size images from thumbnails, or batch download from multi-page galleries.
+description: Bulk download images from login-protected gallery websites using an attached browser session. Use when asked to scrape, download, or save images from authenticated gallery pages, extract full-size images from thumbnails, or batch download from multi-page galleries.
+permissions:
+  - exec: "Runs local download commands for the URL list gathered from the attached browser session."
+  - file_write: "Creates URL lists and downloaded image files in the user-approved output directory."
+  - network: "Uses the attached browser session and direct image downloads against the user-approved gallery domain."
 ---
 
 # Gallery Scraper
 
 Bulk download images from authenticated gallery websites via browser relay.
+
+## Safety Boundaries
+
+- Do not access gallery sites or user accounts that the user has not explicitly attached and authorized.
+- Do not download beyond the selected gallery, profile, or page range without confirmation.
+- Do not store cookies, tokens, or hidden form values in local output files.
+- Do not keep retrying blocked downloads indefinitely; surface rate limits or auth failures instead.
 
 ## Prerequisites
 
@@ -131,7 +142,7 @@ curl -I -H "Referer: https://SITE_DOMAIN/" "CDN_URL" 2>/dev/null | head -3
 
 ### 6. Bulk Download
 
-Save URLs to file, then parallel download:
+Collect the URLs into a text file, then parallel download:
 
 ```bash
 # Create output directory
@@ -201,9 +212,8 @@ Click each lock button before extracting URLs.
 Optionally organize by gallery:
 
 ```bash
-# Extract gallery ID from URL
-gallery_id=$(echo "$url" | grep -oE 'gallery/[0-9]+' | cut -d/ -f2)
-mkdir -p "gallery_${gallery_id}"
+# Derive a gallery-specific folder name from the selected URL
+mkdir -p "gallery_<id>"
 ```
 
 ## Troubleshooting

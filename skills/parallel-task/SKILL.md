@@ -1,16 +1,20 @@
 ---
 name: parallel-task
-description: >
-  Execute plan files by launching multiple parallel subagents to complete tasks simultaneously.
-  Triggers on explicit "/parallel-task" commands.
+description: Coordinate plan files by launching multiple parallel subagents for unblocked tasks. Triggers on explicit "/parallel-task" commands.
 credits: |
   Original skill by [@am-will](https://github.com/am-will)
-  Source: https://github.com/am-will/codex-skills
 ---
 
-# Parallel Task Executor
+# Parallel Task Runner
 
 Use Orchestration Mode. Parse plan files and delegate tasks to parallel subagents.
+
+## Safety Boundaries
+
+- Do not launch subagents for tasks that share write scope until the dependency is resolved.
+- Do not continue past blockers silently; surface the blocked task and stop that branch of work.
+- Do not mark tasks complete until validation from the plan has actually been checked.
+- Do not run this skill unless the user explicitly invoked `/parallel-task` or clearly asked for parallel agent work.
 
 ## Process
 
@@ -123,10 +127,10 @@ After validation, provide a summary of:
 /parallel-task user-profile-plan.md phase 1
 ```
 
-## Execution Summary Template
+## Run Summary Template
 
 ```markdown
-# Sprint/Phase Execution Summary
+# Sprint/Phase Run Summary
 
 ## Tasks Assigned: [N]
 
