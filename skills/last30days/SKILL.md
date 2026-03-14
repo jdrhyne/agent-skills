@@ -1,3 +1,8 @@
+---
+name: last30days
+description: Research what communities have been saying about a topic over the last 30 days across Reddit, X, Hacker News, Stack Overflow, Dev.to, and Lobsters. Use when the user wants recent sentiment, discussion themes, comparisons, or prompting techniques grounded in current community conversations.
+---
+
 # last30days - Community Research Skill
 
 Research what people are saying about a topic across Reddit, X, Hacker News, and developer communities from the last 30 days.
