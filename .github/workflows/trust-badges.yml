@@ -28,13 +28,33 @@ jobs:
           node-version: 22
 
       - name: Scan all skills and generate badges
-        run: npx agentverus-scanner@0.6.2 scan . --badges
+        id: scan
+        run: |
+          set +e
+          npx agentverus-scanner@0.6.2 scan . --badges
+          status=$?
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" -ne 0 ]; then
+            echo "Scanner reported findings; continuing so updated badges can still publish."
+          fi
+          exit 0
 
       - name: Upload badge artifacts
+        if: ${{ hashFiles('badges/**') != '' }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: badges
 
       - name: Deploy to GitHub Pages
+        if: ${{ hashFiles('badges/**') != '' }}
         id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Summarize scan result
+        if: always()
+        run: |
+          if [ "${{ steps.scan.outputs.exit_code }}" = "0" ]; then
+            echo "AgentVerus scan completed without blocking findings." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "AgentVerus scan completed with findings (exit ${{ steps.scan.outputs.exit_code }}), and updated badges were still published." >> "$GITHUB_STEP_SUMMARY"
+          fi
