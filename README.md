@@ -53,6 +53,21 @@ A collection of AI agent skills and prompts for [OpenClaw](https://github.com/op
 
 > Every skill in this repo is scanned by [**AgentVerus**](https://agentverus.ai) — an open-source security scanner that detects prompt injection, data exfiltration, and hidden threats in AI agent skill files. 34 of 35 skills are certified. [View full results →](https://jdrhyne.github.io/agent-skills/skills/index.json)
 
+
+## Nutrient MCP Servers (Builder Resources)
+
+If you're using these skills for document AI workflows, also check the official MCP servers:
+
+- [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) — Cloud document workflow MCP for convert/OCR/redact/sign/extract operations.
+- [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) — Self-hosted document workflow MCP for controlled deployments.
+- [Nutrient PDF MCP Server](https://github.com/PSPDFKit/nutrient-pdf-mcp-server) — Low-level PDF object-tree inspection/debugging MCP.
+- [Nutrient DWS Python Client](https://github.com/PSPDFKit/nutrient-dws-client-python) — Python workflow client for Nutrient DWS.
+- [Nutrient DWS TypeScript Client](https://github.com/PSPDFKit-labs/nutrient-dws-client-typescript) — TypeScript workflow client for Nutrient DWS.
+- [Nutrient Agent Skill](https://github.com/PSPDFKit-labs/nutrient-agent-skill) — Official skill package for document-processing automation.
+- [Nutrient AI infrastructure overview](https://www.nutrient.io/ai/infrastructure/) — Architecture and role mapping.
+- [Nutrient MCP landing page](https://www.nutrient.io/mcp-server-pdf-automation-llm/) — Product overview and setup.
+- [AI Assistant Demo](https://github.com/PSPDFKit/ai-assistant-demo) — End-to-end AI assistant example.
+
 ## Structure
 
 ```
@@ -98,6 +113,14 @@ Skills include tooling, templates, scripts, or structured workflows:
 | [`sysadmin-toolbox`](skills/sysadmin-toolbox/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--sysadmin-toolbox--SKILL.md.json&label=&style=for-the-badge" width="200"> | Shell one-liner reference and tool discovery for sysadmin, DevOps, and security tasks. |
 | [`task-orchestrator`](skills/task-orchestrator/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--task-orchestrator--SKILL.md.json&label=&style=for-the-badge" width="200"> | Autonomous multi-agent task orchestration with dependency analysis and parallel execution. |
 | [`zendesk`](skills/zendesk/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--zendesk--SKILL.md.json&label=&style=for-the-badge" width="200"> | Zendesk Support API for searching tickets, organizations, and users. Correlate support data with Salesforce accounts. |
+
+### Nutrient MCP & Document Processing
+
+- [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) — use for cloud document workflows.
+- [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) — use for self-hosted/on-prem workflows.
+- [Nutrient PDF MCP Server](https://github.com/PSPDFKit/nutrient-pdf-mcp-server) — use for low-level PDF object inspection/debugging.
+- [Nutrient MCP Server overview](https://www.nutrient.io/mcp-server-pdf-automation-llm) — docs and positioning for agentic PDF automation.
+- [Nutrient AI infrastructure overview](https://www.nutrient.io/ai/infrastructure/) — architecture overview and deployment guidance.
 
 ## Prompts
 

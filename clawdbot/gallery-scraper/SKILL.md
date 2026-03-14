@@ -9,7 +9,7 @@ Bulk download images from authenticated gallery websites via browser relay.
 
 ## Prerequisites
 
-- User must have Chrome with Clawdbot Browser Relay extension
+- User must have Chrome with OpenClaw Browser Relay extension
 - User must be logged into the target site
 - User must attach the browser tab (click relay toolbar button, badge ON)
 
@@ -20,7 +20,7 @@ Bulk download images from authenticated gallery websites via browser relay.
 Ask user to:
 1. Log into the gallery site in Chrome
 2. Navigate to the target gallery/profile page
-3. Click the Clawdbot Browser Relay toolbar button (badge shows ON)
+3. Click the OpenClaw Browser Relay toolbar button (badge shows ON)
 
 ### 2. Discover Image URL Pattern
 

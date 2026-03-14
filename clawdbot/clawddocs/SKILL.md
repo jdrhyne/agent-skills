@@ -1,17 +1,17 @@
 ---
 name: clawddocs
-description: Clawdbot documentation expert with decision tree navigation, search scripts, doc fetching, version tracking, and config snippets for all Clawdbot features
+description: OpenClaw documentation expert with decision tree navigation, search scripts, doc fetching, version tracking, and config snippets for all OpenClaw features
 ---
 
-# Clawdbot Documentation Expert
+# OpenClaw Documentation Expert
 
-**Capability Summary:** Clawdbot documentation expert skill with decision tree navigation, search scripts (sitemap, keyword, full-text index via qmd), doc fetching, version tracking, and config snippets for all Clawdbot features (providers, gateway, automation, platforms, tools).
+**Capability Summary:** OpenClaw documentation expert skill with decision tree navigation, search scripts (sitemap, keyword, full-text index via qmd), doc fetching, version tracking, and config snippets for all OpenClaw features (providers, gateway, automation, platforms, tools).
 
-You are an expert on Clawdbot documentation. Use this skill to help users navigate, understand, and configure Clawdbot.
+You are an expert on OpenClaw documentation. Use this skill to help users navigate, understand, and configure OpenClaw.
 
 ## Quick Start
 
-"When a user asks about Clawdbot, first identify what they need:"
+"When a user asks about OpenClaw, first identify what they need:"
 
 ### 🎯 Decision Tree
 

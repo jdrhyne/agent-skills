@@ -1,13 +1,13 @@
 ---
 name: skill-sync
-description: Sync Clawdbot skills between local installation and the shared skill repository. Use when asked to install, update, list, or push skills.
+description: Sync skills between local installation and the GitHub source-of-truth repository. Use when asked to install, update, list, or push skills.
 ---
 
 # Skill Sync
 
-Manage skills from the shared PSPDFKit clawdbot-skills repository.
+Manage skills from the shared GitHub repository with GitHub as canonical source of truth.
 
-> 🔐 **Never commit secrets!** Skills are shared code. Keep API keys, tokens, and credentials in local config files, not in SKILL.md or scripts.
+> Never commit secrets. Keep keys/tokens out of SKILL.md and scripts.
 
 ## Quick Reference
 
@@ -15,16 +15,16 @@ Manage skills from the shared PSPDFKit clawdbot-skills repository.
 # List available skills in the repo
 skill-sync list
 
-# Install a single skill
+# Install one skill
 skill-sync install <skill-name>
 
 # Install/update all skills from repo
 skill-sync install --all
 
-# Push a local skill to the repo
+# Push a local skill update to repo via PR
 skill-sync push <skill-name>
 
-# Update the local repo cache
+# Refresh local repo cache
 skill-sync update
 ```
 
@@ -34,55 +34,20 @@ skill-sync update
 Shows all skills available in the remote repository.
 
 ### `skill-sync install <name>`
-Installs or updates a skill from the repo to your local skills directory.
-- Pulls latest from repo
-- Copies skill folder to local skills dir
-- Overwrites if already exists
+Installs/updates a skill from repo into local skills directory.
 
 ### `skill-sync install --all`
-Installs or updates ALL skills from the repo.
+Installs/updates all skills from repo.
 
 ### `skill-sync push <name>`
-Pushes a local skill to the shared repository via Pull Request.
-- Creates a feature branch (`skill/<name>`)
-- Copies skill from local skills dir to repo
-- Commits and pushes the branch
-- Opens a PR for review using `gh` CLI
-
-⚠️ **Security Warning:** Before pushing, ensure your skill does NOT contain:
-- API keys, tokens, or secrets
-- Passwords or credentials
-- Personal access tokens
-- Client secrets or refresh tokens
-
-Keep credentials in local config files (e.g., `~/.config/`) and reference them via environment variables or paths in your skill documentation.
+Pushes local skill changes via branch + PR (`gh` CLI).
 
 ### `skill-sync update`
-Just pulls the latest from the repo without installing anything. Useful to see what's new.
+Pulls latest repo changes without installing.
 
 ## Configuration
 
-The script uses these paths:
-- **Repo clone:** `~/.clawdbot-skills-repo`
-- **Local skills:** `~/clawd/skills` (or `$CLAWD_SKILLS_DIR` if set)
-- **Remote:** `https://github.com/PSPDFKit/clawdbot-skills.git`
-
-## First-Time Setup
-
-The script auto-clones on first run. No manual setup needed.
-
-## Examples
-
-```bash
-# See what skills are available
-skill-sync list
-
-# Install the buildkite-mcp skill
-skill-sync install buildkite-mcp
-
-# You made a cool new skill locally, share it
-skill-sync push my-cool-skill
-
-# Get latest updates for all skills
-skill-sync install --all
-```
+Default paths:
+- Repo clone: `~/.agent-skills-repo`
+- Local skills: `~/clawd/skills` (or `$CLAWD_SKILLS_DIR`)
+- Remote: `https://github.com/jdrhyne/agent-skills.git`

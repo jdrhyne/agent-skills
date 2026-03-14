@@ -32,7 +32,7 @@ These skills use only portable tools (`read`, `write`, `exec`, `web_search`, `we
 
 | Skill | Location | Tools Used |
 |-------|----------|------------|
-| `context-recovery` | `skills/context-recovery` | `message` (read-only) |
+| `context-recovery` | `skills/context-recovery` | `sessions_history` |
 | `elegant-reports` | `skills/elegant-reports` | `exec` |
 | `ga4` | `skills/ga4` | `exec` |
 | `google-ads` | `skills/google-ads` | `exec`, `browser` |
@@ -125,4 +125,5 @@ Some skills require external tools to be installed:
 
 ---
 
-*Generated: 2026-01-27*
+*Last synced from ClawHub: 2026-02-27*
+*Compatible with OpenClaw 2026.2.23+*

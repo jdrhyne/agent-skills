@@ -1,12 +1,42 @@
 ---
 name: nutrient-openclaw
-description: Process documents in OpenClaw via the Nutrient DWS plugin. Use when the user wants to convert files, extract text or tables, OCR scanned documents, redact PII, watermark PDFs, digitally sign documents, or check credit usage from chat attachments or workspace files.
-metadata: {"clawdbot":{"emoji":"📄"}}
+description: >-
+  OpenClaw-native document processing skill for Nutrient DWS. Use when OpenClaw
+  users need to convert files, extract text or tables, OCR scans, redact PII,
+  watermark PDFs, digitally sign documents, or check credit usage from chat
+  attachments or workspace files. Triggers on OpenClaw tool names
+  (`nutrient_convert_to_pdf`, `nutrient_extract_text`, etc.), "OpenClaw plugin",
+  "Nutrient OpenClaw", and document-processing requests in OpenClaw chats.
+  Files are processed by Nutrient DWS over the network, so use it only when
+  third-party document processing is acceptable. For non-OpenClaw environments,
+  use the universal Nutrient document-processing skill instead.
+homepage: https://www.nutrient.io/api/
+clawdis:
+  emoji: "📄"
+  requires:
+    config:
+      - plugins.entries.nutrient-openclaw.config.apiKey
+  install:
+    - id: nutrient-openclaw
+      kind: node
+      package: "@nutrient-sdk/nutrient-openclaw"
+      label: Install Nutrient OpenClaw package
+  links:
+    homepage: https://www.nutrient.io/api/
+    repository: https://github.com/PSPDFKit-labs/nutrient-openclaw
+    documentation: https://www.nutrient.io/api/documentation/security
+  config:
+    example: |
+      plugins:
+        entries:
+          nutrient-openclaw:
+            config:
+              apiKey: "your-api-key-here"
 ---
 
-# Nutrient Document Processing
+# Nutrient Document Processing (OpenClaw Native)
 
-Use the Nutrient OpenClaw plugin for managed document operations on attachments and local files.
+Best for OpenClaw users. Process documents directly in OpenClaw conversations via native `nutrient_*` tools.
 
 ## Quick examples
 
@@ -16,9 +46,9 @@ Use the Nutrient OpenClaw plugin for managed document operations on attachments 
 - "Add a CONFIDENTIAL watermark to this document"
 - "How many Nutrient credits do I have left?"
 
-## Setup
+## Installation
 
-Install the plugin:
+Preferred install flow inside OpenClaw:
 
 ```bash
 openclaw plugins install @nutrient-sdk/nutrient-openclaw
@@ -35,6 +65,13 @@ plugins:
 ```
 
 Get an API key at [nutrient.io/api](https://www.nutrient.io/api/).
+
+## Data Handling
+
+- `nutrient_*` operations send the file or extracted document content to Nutrient DWS for processing.
+- Review Nutrient's [Processor API security](https://www.nutrient.io/api/documentation/security) and [privacy details](https://www.nutrient.io/api/processor-api/) before using production or sensitive documents.
+- Nutrient documents its hosted Processor API as using HTTPS for data in transit and as not persistently storing input or output files after processing; confirm that matches your organization's requirements before uploading sensitive material.
+- Start with non-sensitive sample files and a least-privilege API key.
 
 ## Tool selection
 
@@ -68,7 +105,7 @@ Get an API key at [nutrient.io/api](https://www.nutrient.io/api/).
 
 - Do not use AI redaction when a preset pattern will do. It is slower, costlier, and harder to verify.
 - Do not extract text from a scan and assume failure means the file is empty. Run OCR first.
-- Do not overwrite the user’s source document with a transformed output.
+- Do not overwrite the user's source document with a transformed output.
 - Do not promise a legally sufficient digital signature without confirming the workflow requirements.
 
 ## Troubleshooting
