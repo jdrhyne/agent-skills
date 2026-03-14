@@ -72,6 +72,17 @@ for rel in "${TARGET_DIRS[@]}"; do
 done
 
 echo ""
+echo "Checking generated README sections"
+echo "================================"
+
+if ! "$REPO_ROOT/scripts/update-readme.sh" --check; then
+  echo "  ✗ ERROR: README generated sections are out of date"
+  ((errors++))
+else
+  echo "  ✓ README generated sections are up to date"
+fi
+
+echo ""
 echo "================================"
 echo "Results: $errors errors, $warnings warnings"
 
