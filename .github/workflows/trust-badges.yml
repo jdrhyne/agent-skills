@@ -28,7 +28,7 @@ jobs:
           node-version: 22
 
       - name: Scan all skills and generate badges
-        run: npx agentverus-scanner@0.3.0 scan . --badges
+        run: npx agentverus-scanner@0.6.2 scan . --badges
 
       - name: Upload badge artifacts
         uses: actions/upload-pages-artifact@v3
