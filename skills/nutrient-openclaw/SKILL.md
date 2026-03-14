@@ -1,13 +1,24 @@
 ---
 name: nutrient-openclaw
-description: Document processing for OpenClaw — convert, extract, OCR, redact, sign, and watermark PDFs and Office documents using the Nutrient DWS API. Use when asked to convert documents (DOCX/XLSX/PPTX to PDF, PDF to images or Office formats), extract text or tables from PDFs, apply OCR to scanned documents, redact sensitive information or PII, add watermarks, or digitally sign documents. Triggers on "convert to PDF", "extract text", "OCR this", "redact PII", "watermark", "sign document", or any document processing request.
+description: Process documents in OpenClaw via the Nutrient DWS plugin. Use when the user wants to convert files, extract text or tables, OCR scanned documents, redact PII, watermark PDFs, digitally sign documents, or check credit usage from chat attachments or workspace files.
+metadata: {"clawdbot":{"emoji":"📄"}}
 ---
 
 # Nutrient Document Processing
 
-Process documents directly in OpenClaw conversations — convert formats, extract text, apply OCR, redact PII, add signatures, and watermark files through natural language.
+Use the Nutrient OpenClaw plugin for managed document operations on attachments and local files.
 
-## Installation
+## Quick examples
+
+- "Convert this Word file to PDF"
+- "OCR this scanned contract and extract the text"
+- "Redact all SSNs and email addresses from this PDF"
+- "Add a CONFIDENTIAL watermark to this document"
+- "How many Nutrient credits do I have left?"
+
+## Setup
+
+Install the plugin:
 
 ```bash
 openclaw plugins install @nutrient-sdk/nutrient-openclaw
@@ -23,34 +34,49 @@ plugins:
         apiKey: "your-api-key-here"
 ```
 
-Get an API key at [nutrient.io/api](https://www.nutrient.io/api/)
+Get an API key at [nutrient.io/api](https://www.nutrient.io/api/).
 
-## Available Tools
+## Tool selection
 
-| Tool | Description |
-|------|-------------|
-| `nutrient_convert_to_pdf` | Convert DOCX, XLSX, PPTX, HTML, or images to PDF |
-| `nutrient_convert_to_image` | Render PDF pages as PNG, JPEG, or WebP |
-| `nutrient_convert_to_office` | Convert PDF to DOCX, XLSX, or PPTX |
-| `nutrient_extract_text` | Extract text, tables, or key-value pairs |
-| `nutrient_ocr` | Apply OCR to scanned PDFs or images |
-| `nutrient_watermark` | Add text or image watermarks |
-| `nutrient_redact` | Redact via patterns (SSN, email, phone) |
-| `nutrient_ai_redact` | AI-powered PII detection and redaction |
-| `nutrient_sign` | Digitally sign PDF documents |
-| `nutrient_check_credits` | Check API credit balance and usage |
+- `nutrient_convert_to_pdf` for Office, HTML, or image to PDF conversion.
+- `nutrient_convert_to_image` for rendering PDF pages as PNG, JPEG, or WebP.
+- `nutrient_convert_to_office` for PDF to DOCX, XLSX, or PPTX conversion.
+- `nutrient_extract_text` for text, tables, and key-value extraction.
+- `nutrient_ocr` for scanned PDFs or standalone images.
+- `nutrient_redact` for deterministic preset-based redaction.
+- `nutrient_ai_redact` for natural-language or contextual PII removal.
+- `nutrient_watermark` for text or image watermarks.
+- `nutrient_sign` for digital signing workflows.
+- `nutrient_check_credits` before batch or AI-heavy runs.
 
-## Example Prompts
+## Workflow
 
-**Convert:** "Convert this Word doc to PDF"
+1. Confirm the source file and desired output format before running any transform.
+2. Prefer the narrowest tool that matches the request instead of chaining broad operations blindly.
+3. Preserve the original file and write outputs with clear suffixes such as `-ocr`, `-redacted`, or `-signed`.
+4. If the user asks for multiple steps, run them in the safest order: OCR first, then extraction or redaction, then watermarking or signing last.
 
-**Extract:** "Extract all text from this scanned receipt" / "Pull tables from this PDF"
+## Decision rules
 
-**Redact:** "Redact all PII from this document" / "Remove email addresses and phone numbers"
+- OCR before extraction if the PDF is image-only, has unselectable text, or extraction looks sparse.
+- Use `nutrient_redact` for explicit patterns like SSNs, emails, or phone numbers. Use `nutrient_ai_redact` only when the request is semantic, broad, or context-dependent.
+- Render only the pages the user needs when converting PDFs to images. Avoid whole-document renders unless explicitly requested.
+- Ask for signing intent and signer details before using `nutrient_sign`; do not assume legal signature requirements from a casual request.
+- Check credits before batch OCR, repeated conversions, or AI redaction so the run does not fail mid-task.
 
-**Watermark:** "Add a CONFIDENTIAL watermark to this PDF"
+## Anti-patterns
 
-**Sign:** "Sign this contract as Jonathan Rhyne"
+- Do not use AI redaction when a preset pattern will do. It is slower, costlier, and harder to verify.
+- Do not extract text from a scan and assume failure means the file is empty. Run OCR first.
+- Do not overwrite the user’s source document with a transformed output.
+- Do not promise a legally sufficient digital signature without confirming the workflow requirements.
+
+## Troubleshooting
+
+- Plugin missing or unavailable: install `@nutrient-sdk/nutrient-openclaw` first.
+- Unauthorized or quota errors: verify the API key and available credits.
+- Weak extraction results: rerun with OCR.
+- Poor OCR quality: confirm the document language and source scan quality.
 
 ## Links
 
