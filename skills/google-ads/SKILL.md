@@ -199,3 +199,11 @@ When reporting findings, use tables:
 - **Authentication failed**: Refresh OAuth token, check `google-ads.yaml`
 - **Developer token rejected**: Ensure token is approved (not test mode)
 - **Customer ID error**: Use 10-digit ID without dashes
+
+## Security & Change-Control Addendum
+
+- Default mode is read-only audit/reporting.
+- Any mutating action (pause/enable/edit bids/budgets) requires explicit confirmation listing impacted entities first.
+- Browser mode must be user-attended for account-affecting actions.
+- Protect `~/.google-ads.yaml` permissions and never echo tokens/secrets in terminal output.
+

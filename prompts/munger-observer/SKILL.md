@@ -77,3 +77,10 @@ Automated daily review applying Charlie Munger's mental models to surface blind 
 Set up a cron job for daily automated review:
 - Recommended time: End of workday (e.g., 5pm local)
 - Trigger message: `MUNGER_OBSERVER_RUN`
+
+## Privacy Addendum
+
+- Analyze only the minimum required memory/session span for the requested review.
+- Exclude credentials, financial account numbers, health data, and private identifiers from outputs.
+- Do not copy or forward personal excerpts outside the current workspace/session without explicit user instruction.
+
