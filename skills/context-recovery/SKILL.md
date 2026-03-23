@@ -268,3 +268,12 @@ User message: "did this happen?"
 > - Nexus sessions: `~/.clawdbot-duke-leto/archive/nexus-sessions/` (96 files)
 >
 > Shall I proceed with the extraction?"
+
+## Privacy Guardrails (Required)
+
+- Default to minimum retrieval scope:
+  - last 24h or last 50 messages (whichever is smaller), unless user asks for more.
+- In DMs/private channels, require explicit user confirmation before broad history scans.
+- Do not persist recovered summaries to memory files without explicit approval.
+- Never include secrets/tokens in recovered summaries; replace with `[REDACTED]`.
+
