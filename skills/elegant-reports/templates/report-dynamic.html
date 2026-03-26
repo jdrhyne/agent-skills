@@ -4,170 +4,7 @@
   <meta charset="UTF-8">
   <title>{{title}}</title>
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 9pt;
-  line-height: 1.35;
-  color: #1a1a1a;
-  background: #fff;
-}
-
-.page {
-  max-width: 8.5in;
-  padding: 0.4in 0.5in;
-}
-
-/* Ultra-compact header */
-.report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #0a0a0a;
-  margin-bottom: 12px;
-}
-
-.report-title {
-  font-size: 16pt;
-  font-weight: 700;
-  color: #0a0a0a;
-  line-height: 1.1;
-}
-
-.report-subtitle {
-  font-size: 9pt;
-  color: #666;
-  margin-top: 2px;
-}
-
-.report-meta {
-  text-align: right;
-  font-size: 8pt;
-  color: #666;
-}
-
-/* DENSE content styling */
-.report-content h1 {
-  font-size: 11pt;
-  font-weight: 700;
-  color: #0a0a0a;
-  margin: 14px 0 6px 0;
-  padding-bottom: 2px;
-  border-bottom: 1px solid #ddd;
-}
-
-.report-content h1:first-child { margin-top: 0; }
-
-.report-content h2 {
-  font-size: 10pt;
-  font-weight: 600;
-  color: #333;
-  margin: 10px 0 4px 0;
-}
-
-.report-content h3 {
-  font-size: 9pt;
-  font-weight: 600;
-  color: #444;
-  margin: 8px 0 3px 0;
-}
-
-.report-content p {
-  margin: 4px 0;
-  text-align: justify;
-  hyphens: auto;
-}
-
-.report-content ul, .report-content ol {
-  margin: 4px 0;
-  padding-left: 14px;
-}
-
-.report-content li { margin: 2px 0; }
-
-.report-content strong { font-weight: 600; }
-
-/* Ultra-compact tables */
-.report-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 6px 0;
-  font-size: 8pt;
-}
-
-.report-content th {
-  background: #0a0a0a;
-  color: #fff;
-  padding: 4px 6px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 7pt;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.report-content td {
-  padding: 3px 6px;
-  border-bottom: 1px solid #e5e5e5;
-  vertical-align: top;
-}
-
-.report-content tr:nth-child(even) { background: #fafafa; }
-
-/* Compact code */
-.report-content pre {
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  padding: 6px;
-  font-size: 7pt;
-  margin: 6px 0;
-  overflow-x: auto;
-  white-space: pre-wrap;
-}
-
-.report-content code {
-  font-family: 'SF Mono', monospace;
-  font-size: 8pt;
-  background: #f0f0f0;
-  padding: 0 3px;
-}
-
-.report-content pre code { background: none; padding: 0; }
-
-.report-content blockquote {
-  border-left: 2px solid #2563EB;
-  padding-left: 8px;
-  margin: 6px 0;
-  color: #555;
-  font-style: italic;
-  font-size: 9pt;
-}
-
-.report-content hr {
-  border: none;
-  border-top: 1px solid #ddd;
-  margin: 10px 0;
-}
-
-.report-footer {
-  margin-top: 12px;
-  padding-top: 6px;
-  border-top: 1px solid #ddd;
-  font-size: 7pt;
-  color: #888;
-  display: flex;
-  justify-content: space-between;
-}
-
-@media print {
-  .page { padding: 0.35in 0.45in; }
-  h1, h2, h3 { page-break-after: avoid; }
-  table, pre { page-break-inside: avoid; }
-}
+{{styles}}
   </style>
 </head>
 <body>
@@ -178,8 +15,8 @@ body {
         <p class="report-subtitle">{{subtitle}}</p>
       </div>
       <div class="report-meta">
-        <div>{{date}}</div>
-        <div>{{author}}</div>
+        <div class="report-meta-item"><strong>Date:</strong> {{date}}</div>
+        <div class="report-meta-item"><strong>Author:</strong> {{author}}</div>
       </div>
     </header>
     <div class="report-content">
@@ -187,7 +24,7 @@ body {
     </div>
     <footer class="report-footer">
       <span>{{author}}</span>
-      <span>{{date}}</span>
+      <span>{{date}} · Confidential</span>
     </footer>
   </div>
 </body>

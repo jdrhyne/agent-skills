@@ -13,6 +13,7 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -22,7 +23,7 @@ const CONFIG = {
   apiUrl: 'https://api.nutrient.io/build',
   templatesDir: path.join(__dirname, 'templates'),
   themesDir: path.join(__dirname, 'themes'),
-  sandboxDir: path.join(process.env.HOME, 'nuri_workspace/nutrient-dws-sandbox')
+  sandboxDir: path.join(os.tmpdir(), 'elegant-reports-sandbox')
 };
 
 // Available templates and their themes
@@ -69,19 +70,6 @@ const TEMPLATES = {
     }
   }
 };
-
-// Load API key from mcporter config if not in env
-function loadApiKey() {
-  if (CONFIG.apiKey) return;
-  
-  try {
-    const configPath = path.join(process.env.HOME, 'clawd-nuri-internal/config/mcporter.json');
-    const mcpConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    CONFIG.apiKey = mcpConfig.mcpServers?.['nutrient-dws']?.env?.NUTRIENT_DWS_API_KEY || '';
-  } catch (e) {
-    // Ignore
-  }
-}
 
 // Simple Markdown to HTML conversion
 function markdownToHtml(markdown) {
@@ -269,10 +257,10 @@ function generatePdfCurl(html, outputPath) {
 
 // Main generate function
 async function generateReport(options) {
-  loadApiKey();
+  fs.mkdirSync(CONFIG.sandboxDir, { recursive: true });
   
   if (!CONFIG.apiKey) {
-    throw new Error('NUTRIENT_DWS_API_KEY not set. Set env var or configure in mcporter.');
+    throw new Error('NUTRIENT_DWS_API_KEY not set. Export it before running this generator.');
   }
   
   const {
