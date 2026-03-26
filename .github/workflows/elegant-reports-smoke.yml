@@ -1,0 +1,27 @@
+name: elegant-reports smoke
+
+on:
+  pull_request:
+    paths:
+      - 'skills/elegant-reports/**'
+      - '.github/workflows/elegant-reports-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/elegant-reports/**'
+      - '.github/workflows/elegant-reports-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: skills/elegant-reports
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test

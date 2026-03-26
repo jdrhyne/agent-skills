@@ -1,27 +1,16 @@
 ---
 name: elegant-reports
-description: Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic. Uses Nutrient DWS API for HTML-to-PDF conversion.
-permissions:
-  - exec: "Runs the local report generator and related preview commands for user-requested report creation."
-  - file_write: "Creates template files, generated HTML, and PDF outputs inside the working directory."
-  - network: "Calls the documented Nutrient DWS API and optional design-reference sites when needed for the workflow."
+description: Generate beautifully designed PDF reports with a Nordic/Scandinavian aesthetic. Use when creating polished executive briefings, analysis reports, or presentation-style PDF outputs from markdown and HTML via Nutrient DWS.
 ---
 
 # elegant-reports
 
 Generate minimalist, elegant PDF reports inspired by Scandinavian design principles.
 
-## Safety Boundaries
-
-- Do not overwrite existing report templates or output files without explicit user approval.
-- Do not send report content to external services other than the documented Nutrient DWS workflow.
-- Do not add remote fonts, libraries, or assets unless the project explicitly allows them.
-- Do not rely on ad-hoc preview scripts when the checked-in generator can produce the same output.
-
 ## Quick Start
 
 ```bash
-cd ~/clawd-nuri-internal/skills/elegant-reports
+cd /path/to/elegant-reports
 
 # Generate a report (dense layout)
 node generate.js report.md output.pdf --template report
@@ -53,7 +42,7 @@ Add YAML frontmatter to control output:
 ---
 title: Q4 Competitive Analysis
 subtitle: Market Intelligence Report
-author: Nuri
+author: Report Author
 template: report
 theme: dark
 ---
@@ -70,7 +59,7 @@ Based on Nordic/Scandinavian design principles:
 - **One accent color** — Blue (#2563EB) used sparingly
 - **Functional beauty** — Form follows function
 
-See `NORDIC_DESIGN_RESEARCH.md` for complete design documentation.
+See `references/nordic-design-research.md` for complete design documentation.
 
 ---
 
@@ -83,7 +72,7 @@ This is how to create new templates with visual feedback:
 ### Step 1: Research References
 
 ```bash
-# Use the browser tool to study approved design examples
+# Use browser tool to study design examples
 browser navigate https://www.canva.com/templates/...
 browser screenshot
 
@@ -154,10 +143,25 @@ Available variables: `{{title}}`, `{{subtitle}}`, `{{author}}`, `{{date}}`, `{{c
 ### Step 4: Test with Visual Feedback
 
 ```bash
-# Generate preview output with the checked-in generator
-node generate.js test.md preview.pdf --template my-template --output-html
+# Generate test HTML manually
+node -e "
+const fs = require('fs');
+const css = fs.readFileSync('themes/my-theme.css', 'utf8');
+let html = fs.readFileSync('templates/my-template.html', 'utf8');
+html = html.replace('{{styles}}', css);
+html = html.replace(/\{\{title\}\}/g, 'Test Title');
+html = html.replace(/\{\{subtitle\}\}/g, 'Test Subtitle');
+html = html.replace(/\{\{date\}\}/g, 'January 2026');
+html = html.replace(/\{\{author\}\}/g, 'Report Author');
+html = html.replace(/\{\{content\}\}/g, '<p>Test content</p>');
+fs.writeFileSync('test-output.html', html);
+"
 
-# Review the generated HTML or PDF output, note layout issues, adjust template or theme, and repeat
+# Preview in browser
+browser navigate file://$(pwd)/test-output.html
+browser screenshot
+
+# See what's wrong, fix it, repeat
 ```
 
 ### Step 5: Register in Generator
@@ -283,6 +287,28 @@ node generate.js test.md output.pdf --template my-template --output-html
 ```
 Types: `callout-tip` (green), `callout-warning` (amber), `callout-danger` (red)
 
+### ASCII Diagrams
+
+ASCII diagrams are automatically styled with an elegant light background when using the `text`, `diagram`, or `ascii` language in fenced code blocks:
+
+~~~markdown
+```text
+┌────────────────────────────────────┐
+│         ARCHITECTURE               │
+├────────────────────────────────────┤
+│  Layer 1  │  Layer 2  │  Layer 3   │
+└────────────────────────────────────┘
+```
+~~~
+
+Features:
+- **Light paper-like background** — Clean gradient instead of dark code block
+- **Subtle border and shadow** — Elegant container styling
+- **Optimized typography** — JetBrains Mono with disabled ligatures for proper box-drawing
+- **Automatic detection** — Works with `text`, `diagram`, or `ascii` language tags
+
+Use box-drawing characters (`─`, `│`, `┌`, `┐`, `└`, `┘`, `├`, `┤`, `┬`, `┴`, `┼`) for professional-looking architecture diagrams, flowcharts, and positioning maps.
+
 ### Tables with Dark Headers
 ```html
 <table class="no-break">
@@ -315,7 +341,8 @@ Tables, cards, callouts, and KPI strips have `page-break-inside: avoid` by defau
 ```
 elegant-reports/
 ├── SKILL.md                    # This file
-├── NORDIC_DESIGN_RESEARCH.md   # Design principles documentation
+├── references/
+│   └── nordic-design-research.md # Design principles documentation
 ├── generate.js                 # Main generator script
 ├── package.json
 ├── themes/
@@ -334,8 +361,8 @@ elegant-reports/
 ## Dependencies
 
 - Node.js 18+
-- axios, form-data (declared in the package metadata; install through the project package manager before first use)
-- Nutrient DWS API key (configured in mcporter or NUTRIENT_DWS_API_KEY env var)
+- axios, form-data (`npm install`)
+- Nutrient DWS API key available via the `NUTRIENT_DWS_API_KEY` environment variable
 
 ## API Usage
 
@@ -348,6 +375,6 @@ await generateReport({
   template: 'report',
   theme: 'dark',
   title: 'My Report',
-  author: 'Nuri'
+  author: 'Report Author'
 });
 ```
