@@ -79,7 +79,8 @@ Load relevant references when user is:
 
 References auto-refresh weekly (Sundays 5am ET) from the upstream repo:
 ```bash
-~/clawd-duke-leto/skills/sysadmin-toolbox/scripts/refresh.sh
+# Run from the skill directory (refresh.sh self-locates by default)
+scripts/refresh.sh
 ```
 
 Manual refresh anytime:
