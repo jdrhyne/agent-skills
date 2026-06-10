@@ -82,11 +82,11 @@ agent-skills/
 
 ## Compatibility
 
-**78% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
+**79% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
 
 | Category | Count | Platforms |
 |----------|-------|-----------|
-| Universal | 7 | ✅ All |
+| Universal | 8 | ✅ All |
 | Portable | 18 | ✅ All (uses read/write/exec) |
 | OpenClaw-only | 7 | OpenClaw only |
 
@@ -100,6 +100,7 @@ Skills include tooling, templates, scripts, or structured workflows:
 | Skill | Trust &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 |-------|-------|-------------|
 | [`context-recovery`](skills/context-recovery/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--context-recovery--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Automatically recover working context after session compaction or when continuation is implied but context is missing. |
+| [`design-audit`](skills/design-audit/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--design-audit--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Premium UI/UX design auditor (Jobs/Ive philosophy) — audits and elevates existing interfaces without changing functionality. |
 | [`elegant-reports`](skills/elegant-reports/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--elegant-reports--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Generate beautifully designed PDF reports with Nordic/Scandinavian aesthetic. |
 | [`ga4`](skills/ga4/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--ga4--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Query Google Analytics 4 (GA4) data via the Analytics Data API. |
 | [`gong`](skills/gong/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--gong--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Gong API for searching calls, transcripts, and conversation intelligence. |

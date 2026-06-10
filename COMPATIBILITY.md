@@ -20,6 +20,7 @@ These skills are pure instruction/methodology with no tool dependencies:
 |-------|----------|
 | `planner` | `skills/planner` |
 | `remotion` | `skills/remotion` |
+| `design-audit` | `skills/design-audit` |
 | `frontend-design` | `prompts/frontend-design` |
 | `humanizer` | `prompts/humanizer` |
 | `munger-observer` | `prompts/munger-observer` |
