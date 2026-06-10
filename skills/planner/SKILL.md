@@ -17,7 +17,7 @@ Create structured, orchestrator-ready plans for multi-task projects.
 
 ## Quick Start
 
-Load the full planner prompt from `prompts/planner.md` and follow its process:
+Follow this process:
 
 1. **Phase 0**: Clarify requirements (ask up to 5 targeted questions)
 2. **Phase 1**: Research & understand the codebase
@@ -127,9 +127,8 @@ Or invoke directly:
 
 ---
 
-## Files
+## Related
 
-- `prompts/planner.md` — Full planner agent prompt
-- `prompts/parallel-task.md` — Parallel task worker prompt
+- [`parallel-task`](../parallel-task/) — Parallel task worker that executes the plan this skill produces
 
-Both are based on am-will's codex-skills prompts.
+Adapted from am-will's codex-skills planner/parallel-task prompts.
