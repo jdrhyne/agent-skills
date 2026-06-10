@@ -43,7 +43,6 @@ These skills use only portable tools (`read`, `write`, `exec`, `web_search`, `we
 | `nudocs` | `skills/nudocs` | `exec` |
 | `salesforce` | `skills/salesforce` | `exec` |
 | `parallel-task` | `skills/parallel-task` | `exec` |
-| `sysadmin-toolbox` | `skills/sysadmin-toolbox` | `exec`, `read` |
 | `task-orchestrator` | `skills/task-orchestrator` | `sessions_spawn` OR `exec` (has fallback) |
 | `codex` | `codex/codex` | `exec` |
 | `command-creator` | `codex/command-creator` | `write` |
