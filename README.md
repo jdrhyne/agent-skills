@@ -19,7 +19,7 @@
                   ╱    ╲   ┌─────────────────────────────────────┐   ╱    ╲
                  ╱  ▲▲  ╲  │  ◄► JIRA  ◄► GA4  ◄► GOOGLE ADS ◄►  │  ╱  ▲▲  ╲
                 ╱  ▲▲▲▲  ╲ │  ◄► GSC  ◄► REMOTION  ◄► PLANNER ◄► │ ╱  ▲▲▲▲  ╲
-               ╱   ▲▲▲▲   ╲│  ◄► ORCHESTRATOR  ◄► SYSADMIN  ◄►   │╱   ▲▲▲▲   ╲
+               ╱   ▲▲▲▲   ╲│  ◄► ORCHESTRATOR  ◄► ZENDESK   ◄►   │╱   ▲▲▲▲   ╲
               ╱            ╲│  ◄► KNOWLEDGE-GRAPH  ◄► NUTRIENT ◄►  │╱            ╲
               ╱════════════╲─────────────────────────────────────╱════════════╲
              ╱  ░░░░░░░░░░  ╲                                    ╱  ░░░░░░░░░░  ╲
@@ -82,12 +82,12 @@ agent-skills/
 
 ## Compatibility
 
-**79% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
+**78% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
 
 | Category | Count | Platforms |
 |----------|-------|-----------|
 | Universal | 7 | ✅ All |
-| Portable | 19 | ✅ All (uses read/write/exec) |
+| Portable | 18 | ✅ All (uses read/write/exec) |
 | OpenClaw-only | 7 | OpenClaw only |
 
 See **[COMPATIBILITY.md](./COMPATIBILITY.md)** for the full matrix and installation instructions per platform.
