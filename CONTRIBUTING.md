@@ -121,7 +121,8 @@ Choose the pattern that fits your task:
 ### 1. Fork & Create
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/agent-skills.git
+# Fork the repo on GitHub, then clone your fork:
+git clone https://github.com/<your-username>/agent-skills.git
 cd agent-skills
 mkdir -p skills/my-new-skill  # or prompts/ or clawdbot/
 ```

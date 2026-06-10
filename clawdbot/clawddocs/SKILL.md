@@ -135,7 +135,7 @@ See `./snippets/common-configs.md` for ready-to-use configuration patterns:
 - For complex questions, search the full-text index
 - Check `recent.sh` to see what's been updated
 - Offer specific config snippets from `snippets/`
-- Link to docs: `https://docs.clawd.bot/<path>`
+- Link to docs: `https://docs.openclaw.ai/<path>`
 
 ## Example Interactions
 
@@ -156,7 +156,7 @@ See `./snippets/common-configs.md` for ready-to-use configuration patterns:
   }
 }
 ```
-4. Link: https://docs.clawd.bot/providers/discord
+4. Link: https://docs.openclaw.ai/providers/discord
 
 **User:** "What's new in the docs?"
 

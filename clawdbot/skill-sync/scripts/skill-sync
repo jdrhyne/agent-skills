@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Configuration
-REPO_URL="https://github.com/PSPDFKit/clawdbot-skills.git"
-REPO_DIR="${CLAWDBOT_SKILLS_REPO:-$HOME/.clawdbot-skills-repo}"
+REPO_URL="https://github.com/jdrhyne/agent-skills.git"
+REPO_DIR="${AGENT_SKILLS_REPO:-$HOME/.agent-skills-repo}"
 LOCAL_SKILLS_DIR="${CLAWD_SKILLS_DIR:-$HOME/clawd/skills}"
 
 # Colors
@@ -204,13 +204,13 @@ ${skill_desc}
 *Created via \`skill-sync push\`*"
 
     pr_url=$(gh pr create \
-        --repo PSPDFKit/clawdbot-skills \
+        --repo jdrhyne/agent-skills \
         --title "$action $skill_name skill" \
         --body "$pr_body" \
         --head "$branch_name" \
         --base main 2>&1) || {
             error "Failed to create PR. You can create it manually at:"
-            echo "  https://github.com/PSPDFKit/clawdbot-skills/compare/$branch_name"
+            echo "  https://github.com/jdrhyne/agent-skills/compare/$branch_name"
             git checkout main
             exit 1
         }
@@ -230,7 +230,7 @@ cmd_update() {
 # Show help
 cmd_help() {
     cat <<EOF
-skill-sync - Manage Clawdbot skills from shared repository
+skill-sync - Manage OpenClaw skills from shared repository
 
 Usage: skill-sync <command> [args]
 
@@ -243,7 +243,7 @@ Commands:
   help              Show this help
 
 Configuration:
-  CLAWDBOT_SKILLS_REPO  Repo clone location (default: ~/.clawdbot-skills-repo)
+  AGENT_SKILLS_REPO     Repo clone location (default: ~/.agent-skills-repo)
   CLAWD_SKILLS_DIR      Local skills dir (default: ~/clawd/skills)
 
 EOF

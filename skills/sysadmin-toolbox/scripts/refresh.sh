@@ -6,7 +6,8 @@ set -e
 
 REPO_URL="https://github.com/trimstray/the-book-of-secret-knowledge.git"
 TEMP_DIR="/tmp/tbsk-refresh-$$"
-SKILL_DIR="${1:-$HOME/clawd-duke-leto/skills/sysadmin-toolbox}"
+# Default to this skill's directory (the parent of scripts/); override with arg 1
+SKILL_DIR="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
 
 echo "🔄 Refreshing sysadmin-toolbox from upstream..."
 

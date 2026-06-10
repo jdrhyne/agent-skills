@@ -12,19 +12,20 @@ Query GSC for search analytics, indexing status, and SEO insights.
 1. **Credentials**: Uses same OAuth credentials as GA4 skill (stored in `.env`)
 2. **Scopes**: Requires `webmasters.readonly` scope on your Google Cloud OAuth consent screen
 3. **Access**: Your Google account must have access to the Search Console properties
+4. **Run location**: Commands below use relative paths — run them from this skill's directory (`cd` into it first)
 
 ## Commands
 
 ### List Available Sites
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py sites
+source .env && \
+python3 scripts/gsc_query.py sites
 ```
 
 ### Top Search Queries
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py top-queries \
+source .env && \
+python3 scripts/gsc_query.py top-queries \
   --site "https://www.nutrient.io" \
   --days 28 \
   --limit 20
@@ -32,8 +33,8 @@ python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py top-queries \
 
 ### Top Pages by Traffic
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py top-pages \
+source .env && \
+python3 scripts/gsc_query.py top-pages \
   --site "https://www.nutrient.io" \
   --days 28 \
   --limit 20
@@ -42,8 +43,8 @@ python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py top-pages \
 ### Find Low-CTR Opportunities
 High impressions but low click-through rate = optimization opportunities:
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py opportunities \
+source .env && \
+python3 scripts/gsc_query.py opportunities \
   --site "https://www.nutrient.io" \
   --days 28 \
   --min-impressions 100
@@ -51,23 +52,23 @@ python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py opportunities \
 
 ### Inspect URL Indexing Status
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py inspect-url \
+source .env && \
+python3 scripts/gsc_query.py inspect-url \
   --site "https://www.nutrient.io" \
   --url "/sdk/web"
 ```
 
 ### List Sitemaps
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py sitemaps \
+source .env && \
+python3 scripts/gsc_query.py sitemaps \
   --site "https://www.nutrient.io"
 ```
 
 ### Raw Search Analytics (JSON)
 ```bash
-source /Users/admin/clawd/skills/gsc/.env && \
-python /Users/admin/clawd/skills/gsc/scripts/gsc_query.py search-analytics \
+source .env && \
+python3 scripts/gsc_query.py search-analytics \
   --site "https://www.nutrient.io" \
   --days 28 \
   --dimensions query page \
