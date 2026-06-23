@@ -17,9 +17,9 @@ Read `DESIGN.md` once at the start of a run for the full architecture and the do
 
 ## Phase 0 — FRAME (metric discovery)
 
-Given `{project, goal, context}`:
+Given `{project, goal, context}` — follow the procedure in `references/metric-discovery.md` (restate the goal as an outcome → enumerate candidates on the proxy→outcome spectrum → score on six axes → choose primary + guardrails + strategy → red-team for gaming). In brief:
 1. Identify or select a **domain adapter** (`adapters/*.md`). If none fits, draft an inline adapter following `references/domain-adapter-contract.md`.
-2. Propose **candidate metrics** (use the adapter's menu as a prior, then reason from the goal). For each: what it measures, how it's measured, direction of "better", measurement cost, and noise/latency.
+2. Propose **candidate metrics** (the adapter's menu is a *prior*, not the answer — reason from the goal). Score each on measurability, latency, noise, alignment, gameability, and cost. Prefer alignment over convenience for the primary.
 3. Pick ONE **primary objective**, a set of **guardrail metrics** that must not regress, a **trial budget** (wall-clock and/or cost per trial), and a **stop condition** (budget exhausted, plateau over K trials, or target hit).
 4. Choose the **accept/reject strategy** for this domain: `deterministic-delta` (fast, low-noise), `significance-test`, or `bandit` (noisy/delayed/expensive — e.g. ads).
 5. Name the **Goodhart guards** (guardrail metrics, holdout, periodic critic).
@@ -50,6 +50,7 @@ At any stop, report (`arl status` summarizes most of it): metric baseline → cu
 
 ## Reference files
 - `DESIGN.md` — architecture, per-domain design tensions, and the pi-autoresearch prior-art decision (read once per run).
+- `references/metric-discovery.md` — the Phase 0 procedure: deriving + scoring + red-teaming the metric.
 - `references/runtime-contract.md` — the `.auto/` layout, `METRIC` contract, MAD confidence, and `arl` commands.
 - `references/domain-adapter-contract.md` — how to define a new domain adapter.
 - `references/journal-schema.md` — the ledger record formats.
