@@ -28,6 +28,8 @@ Given `{project, goal, context}` — follow the procedure in `references/metric-
 ## Phase 1 — BASELINE
 Write `.auto/measure.sh` (and `.auto/checks.sh` if guardrails require it). `arl init` with the primary metric + direction, run the baseline (`arl run`), and record it (`arl log --status keep --metric <baseline> --desc baseline`). If the baseline can't be measured cleanly and repeatably, stop (see "When NOT to run").
 
+**Before proposing any change, profile where the cost actually is, and confirm the benchmark stresses the IN-SCOPE artifact — not a dependency or unrelated code.** (Validated the hard way on a live run: the assumed hot path was wrong twice, and the first workload spent 97% of its time in a library that was out of scope. See `adapters/code-perf-audit.md` → Pitfalls.) A loop that optimizes code which isn't the bottleneck produces confident, useless churn.
+
 ## Phase 2 — LOOP (until stop condition)
 Each iteration:
 1. Read the artifact, `.auto/prompt.md`, the `.auto/log.jsonl` tail, and `.auto/ideas.md` — never re-propose an exhausted line.
