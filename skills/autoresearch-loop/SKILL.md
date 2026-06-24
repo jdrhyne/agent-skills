@@ -28,7 +28,7 @@ Given `{project, goal, context}` — follow the procedure in `references/metric-
 ## Phase 1 — BASELINE
 Write `.auto/measure.sh` (and `.auto/checks.sh` if guardrails require it). `arl init` with the primary metric + direction, run the baseline (`arl run`), and record it (`arl log --status keep --metric <baseline> --desc baseline`). If the baseline can't be measured cleanly and repeatably, stop (see "When NOT to run").
 
-**Before proposing any change, profile where the cost actually is, and confirm the benchmark stresses the IN-SCOPE artifact — not a dependency or unrelated code.** (Validated the hard way on a live run: the assumed hot path was wrong twice, and the first workload spent 97% of its time in a library that was out of scope. See `adapters/code-perf-audit.md` → Pitfalls.) A loop that optimizes code which isn't the bottleneck produces confident, useless churn.
+**Before proposing any change, profile where the cost actually is, and confirm the benchmark stresses the IN-SCOPE artifact — not a dependency, a native/FFI call, an external engine, the network, or unrelated code.** (Validated the hard way on two live runs: once the assumed hot path was wrong twice and 97% of time was in an out-of-scope library; once the in-scope managed code was only 0.4–3.8% of wall-time because a Rust NIF dominated — the correct loop output there was a *true negative*, "re-scope," not a sub-noise edit. See `adapters/code-perf-audit.md` → Pitfalls.) Spend one profiling run on the managed-vs-native/dependency split; a loop that optimizes code which isn't the bottleneck produces confident, useless churn — and proving "no in-scope headroom" cheaply is itself a successful outcome.
 
 ## Phase 2 — LOOP (until stop condition)
 Each iteration:
