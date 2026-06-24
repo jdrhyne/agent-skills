@@ -46,6 +46,7 @@ Respect concurrency reality: deterministic domains can run many fast sequential 
 - Prune dead-end hypothesis families.
 - Re-tune the trial budget (raise if trials are cheap and informative; lower if wasteful).
 - **Goodhart check:** inspect recent keeps — is the metric genuinely better, or gamed (tests deleted, benchmark special-cased, holdout diverging from training metric, downstream conversion dropping while CTR rises)? If gamed, tighten guardrails or refine the metric, and revert the gamed keep.
+- **Proxy-degeneracy check:** if a cheap proxy metric can be *structurally degenerate* for some task shapes (e.g. a routing score that is always 0 when landing == target), it will under-measure or mislead — and it can "pass" real defects a behavioral check would catch. When a cheap and a behavioral oracle both exist, iterate on the cheap one but **decide keeps with the behavioral oracle**. Validated on a real run where the content score read a genuine fix as +2.15 while the browser-flow oracle measured +28.68 and also caught three broken links the content score missed. See `adapters/web-onboarding.md`.
 
 ## Output
 At any stop, report (`arl status` summarizes most of it): metric baseline → current with the delta and confidence, the kept improvements (each with its delta and cost), what was tried and discarded with the `--asi` reasons from `.auto/log.jsonl`, the remaining promising ideas, and total cost. The durable record is `.auto/` plus the git history of kept commits.
@@ -56,4 +57,4 @@ At any stop, report (`arl status` summarizes most of it): metric baseline → cu
 - `references/runtime-contract.md` — the `.auto/` layout, `METRIC` contract, MAD confidence, and `arl` commands.
 - `references/domain-adapter-contract.md` — how to define a new domain adapter.
 - `references/journal-schema.md` — the ledger record formats.
-- `adapters/*.md` — concrete domain adapters (code-perf-audit, bug-finding, code-generation, google-ads).
+- `adapters/*.md` — concrete domain adapters (code-perf-audit, bug-finding, code-generation, google-ads, web-onboarding).

@@ -1,0 +1,26 @@
+# Adapter: web-onboarding
+
+The "can a newcomer (or an AI agent) actually accomplish the task" domain — optimizing a marketing/docs site's **navigability and onboarding** rather than its code. The metric is *agent task-success* against the rendered site: from a landing page, can the visitor find what they need to act (get an API key, make a first call, reach pricing/getting-started)? A near-deterministic, cheap-ish, repeatable proxy for funnel conversion — without needing live traffic.
+
+- **name:** web-onboarding
+- **when-to-use:** improving findability / first-call onboarding on a site, where you have (or can build) a task-success harness that scores routing + page signals over the rendered site. The true outcome (signup→activation conversion) is delayed/noisy/expensive (see `google-ads`); this adapter optimizes a *cheap behavioral proxy* for it.
+- **artifact:** the in-scope page/component source (links, CTAs, IA, copy). OFF-limits: the task list / scoring rubric itself (editing it games the metric), and unrelated pages outside the change's scope.
+- **candidate-metrics:**
+  - agent task-success score (route findability + target-page signals + support coverage), higher better — `fast-low-noise` in content mode, `low-noise` in browser mode. Default primary.
+  - per-task route score (did a discoverable path to the target exist), higher better — the sharpest lever for "content exists but isn't linked."
+- **guardrails:** no broken links introduced (every added href must resolve — verify 200 before trusting a "win"); no regression on other tasks/pages; house components only (no raw HTML / one-off styles); existing passing tasks stay passing.
+- **trial-harness:** run the task-success benchmark against the **rendered** site. Two modes — a cheap content/route scorer (no browser) for fast iteration, and a **browser-flow (Playwright) mode** that actually navigates/clicks. Emit `METRIC agent_success_score=...` (+ per-task scores). Iterate in content mode; **decide keeps with the browser-flow mode.**
+- **accept-reject:** `deterministic-delta` on the score, but **the behavioral (browser-flow) oracle is authoritative**, not the content score (see Pitfalls). A keep must raise the targeted tasks without regressing others.
+- **revert:** `git checkout` of the in-scope page/component (instant, no hysteresis). Safe to run many sequential trials.
+- **goodhart-guards:** the browser-flow oracle (an agent must actually reach/click the target) is the main guard — the content scorer rewards keyword/signal *presence*, which is gameable by stuffing; a clickable visible link is not. Phase-3 critic: are score gains real navigability, or rubric-gaming? Periodically sanity-check the proxy against the real outcome (actual signup/activation) so you're not optimizing a proxy that has drifted from conversion.
+- **trial-budget-default:** seconds–low-minutes per trial (rendered build + score; browser mode is slower). Many sequential trials are fine. Cost unit = tokens (+ a one-time browser install for the oracle).
+
+## Pitfalls & techniques (validated on a real marketing-site run: +28.68 on the data-extraction onboarding subset)
+
+- **The cheap proxy metric can be structurally degenerate for some task shapes — trust the behavioral oracle, not the proxy.** On the live run, the "page shows link X" tasks had `landing == target`, which made the route score a constant 0 and the content-only score read the genuine fix as **+2.15**. The browser-flow oracle (agent actually finding/clicking the new links) measured the real effect: **+28.68**. If the cheap metric is degenerate for a task family, the behavioral oracle is the truth, and the cheap metric is only a fast pre-filter.
+- **The behavioral oracle catches defects the content scorer can't.** The first attempt added six links but three used a constant from the *wrong export object* (`EXTERNAL_LINKS.X` where `X` lived in a different object → `undefined` href). The content scorer "passed" them; the browser-flow oracle left those tasks at route 0 (no clickable link), pinpointing the broken three. This is the loop rejecting a real bug — exactly what a strong oracle is for. **Verify every added link resolves (200) and renders a real visible anchor.**
+- **Measure the RENDERED artifact, not source.** Scoring raw `.astro`/`.mdoc`/template source under-reads massively (components, includes, links resolve at build) → false-low scores and false "gaps." Always run rendered (local dev server or deployed). This is the `code-perf-audit` "stress the in-scope artifact" lesson in web form.
+- **The fix archetype is usually linking/IA, not content.** `route=0 / target high` means the destination is good but undiscoverable — the smallest winning change is surfacing a discoverable link/CTA on the hub page, not rewriting the target.
+
+## Relationship to the outcome
+This is a proxy domain: agent-success is cheap and repeatable, but it is not the business outcome (activation/conversion), which is delayed-noisy-expensive like `google-ads`. Optimize the proxy for fast iteration, guard with the browser-flow oracle, and periodically validate proxy→outcome so the loop doesn't perfect a metric that has decoupled from real onboarding.
