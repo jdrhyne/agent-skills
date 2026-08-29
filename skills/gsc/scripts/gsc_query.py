@@ -1,344 +1,488 @@
 #!/usr/bin/env python3
-"""
-Google Search Console API Query Tool
+"""Bounded, read-only Google Search Console queries."""
 
-Queries GSC for search analytics, URL inspection, sitemaps, and more.
-
-Usage:
-    python gsc_query.py search-analytics --site https://example.com --days 28
-    python gsc_query.py top-queries --site https://example.com --limit 20
-    python gsc_query.py top-pages --site https://example.com --limit 20
-    python gsc_query.py inspect-url --site https://example.com --url /some/page
-    python gsc_query.py sitemaps --site https://example.com
-    python gsc_query.py sites
-"""
+from __future__ import annotations
 
 import argparse
+from datetime import date, datetime, timedelta
 import json
-import os
+import math
+import re
 import sys
-from datetime import datetime, timedelta
-from typing import Optional
+import time
+from typing import Any, Callable, Iterable
+from urllib.parse import urljoin, urlsplit
+from zoneinfo import ZoneInfo
 
-try:
-    from google.oauth2.credentials import Credentials
-    from googleapiclient.discovery import build
-    from googleapiclient.errors import HttpError
-except ImportError:
-    print("ERROR: Required packages not installed. Run:")
-    print("  pip install google-auth google-auth-oauthlib google-api-python-client")
-    sys.exit(1)
+from gsc_auth import AuthError, DEFAULT_TOKEN_FILE, load_stored_credentials
 
 
-def get_credentials() -> Credentials:
-    """Get credentials from environment variables."""
-    client_id = os.environ.get("GOOGLE_CLIENT_ID")
-    client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
-    refresh_token = os.environ.get("GOOGLE_REFRESH_TOKEN")
-    
-    if not all([client_id, client_secret, refresh_token]):
-        print("ERROR: Missing credentials. Set these environment variables:")
-        print("  GOOGLE_CLIENT_ID")
-        print("  GOOGLE_CLIENT_SECRET")
-        print("  GOOGLE_REFRESH_TOKEN")
-        sys.exit(1)
-    
-    return Credentials(
-        token=None,
-        refresh_token=refresh_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=client_id,
-        client_secret=client_secret,
-        scopes=["https://www.googleapis.com/auth/webmasters.readonly"]
-    )
+PT = ZoneInfo("America/Los_Angeles")
+DIMENSIONS = {"country", "date", "device", "hour", "page", "query", "searchAppearance"}
+FILTER_DIMENSIONS = {"country", "device", "page", "query", "searchAppearance"}
+FILTER_OPERATORS = {"contains", "equals", "notContains", "notEquals", "includingRegex", "excludingRegex"}
+SEARCH_TYPES = {"discover", "googleNews", "news", "image", "video", "web"}
+DATA_STATES = {"final", "all", "hourly_all"}
+TRANSIENT_STATUS = {429, 500, 502, 503, 504}
+DOMAIN_RE = re.compile(
+    r"(?=.{1,253}\Z)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+"
+    r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\Z"
+)
 
 
-def get_service():
-    """Build the Search Console service."""
-    creds = get_credentials()
-    return build("searchconsole", "v1", credentials=creds)
+class QueryError(RuntimeError):
+    """Safe validation or provider-contract error."""
 
 
-def list_sites():
-    """List all sites available in Search Console."""
-    service = get_service()
-    response = service.sites().list().execute()
-    sites = response.get("siteEntry", [])
-    
-    if not sites:
-        print("No sites found in Search Console.")
-        return
-    
-    print(f"Found {len(sites)} site(s):\n")
-    for site in sites:
-        print(f"  {site['siteUrl']}")
-        print(f"    Permission: {site['permissionLevel']}")
-        print()
+def bounded_int(minimum: int, maximum: int) -> Callable[[str], int]:
+    def parse(value: str) -> int:
+        try:
+            parsed = int(value)
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(f"must be an integer from {minimum} to {maximum}") from exc
+        if not minimum <= parsed <= maximum:
+            raise argparse.ArgumentTypeError(f"must be from {minimum} to {maximum}")
+        return parsed
+
+    return parse
 
 
-def search_analytics(site_url: str, days: int = 28, dimensions: list = None, 
-                     row_limit: int = 1000, start_date: str = None, end_date: str = None):
-    """Query search analytics data."""
-    service = get_service()
-    
-    if not end_date:
-        end_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
-    if not start_date:
-        start_date = (datetime.now() - timedelta(days=days+3)).strftime("%Y-%m-%d")
-    
-    if not dimensions:
-        dimensions = ["query", "page"]
-    
-    request = {
+def validate_site(site: str) -> str:
+    if not site or len(site) > 2048 or any(ord(char) < 32 for char in site):
+        raise QueryError("site must be a nonempty Search Console property identifier")
+    if site.startswith("sc-domain:"):
+        domain = site.removeprefix("sc-domain:")
+        if not DOMAIN_RE.fullmatch(domain):
+            raise QueryError("domain properties must use sc-domain: followed by a valid ASCII domain")
+        return site
+    parsed = urlsplit(site)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise QueryError("site must be an http(s) URL-prefix property or sc-domain: property")
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise QueryError("site URL must not contain credentials, a query, or a fragment")
+    return site
+
+
+def validate_inspection_url(site: str, value: str) -> str:
+    if not value or len(value) > 2048 or any(ord(char) < 32 for char in value):
+        raise QueryError("inspection URL must be nonempty and at most 2048 characters")
+    if not urlsplit(value).scheme:
+        if site.startswith("sc-domain:"):
+            raise QueryError("relative inspection URLs cannot be used with a domain property")
+        value = urljoin(site.rstrip("/") + "/", value.lstrip("/"))
+    parsed = urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise QueryError("inspection URL must be an absolute http(s) URL")
+    if parsed.username or parsed.password or parsed.fragment:
+        raise QueryError("inspection URL must not contain credentials or a fragment")
+    return value
+
+
+def parse_iso_date(value: str, label: str) -> date:
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        raise QueryError(f"{label} must use YYYY-MM-DD")
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise QueryError(f"{label} is not a valid calendar date") from exc
+
+
+def resolve_date_range(
+    *, days: int | None, start_date: str | None, end_date: str | None, data_state: str, today: date | None = None
+) -> tuple[str, str, int]:
+    if data_state not in DATA_STATES:
+        raise QueryError("data_state must be final, all, or hourly_all")
+    if (start_date is None) != (end_date is None):
+        raise QueryError("start_date and end_date must be supplied together")
+    if start_date is not None:
+        if days is not None:
+            raise QueryError("days cannot be combined with explicit start_date/end_date")
+        start = parse_iso_date(start_date, "start_date")
+        end = parse_iso_date(end_date or "", "end_date")
+        window_days = (end - start).days + 1
+    else:
+        window_days = 28 if days is None else days
+        if not 1 <= window_days <= 480:
+            raise QueryError("days must be from 1 to 480")
+        current = today or datetime.now(PT).date()
+        end = current - timedelta(days=3 if data_state == "final" else 0)
+        start = end - timedelta(days=window_days - 1)
+    if start > end:
+        raise QueryError("start_date must be on or before end_date")
+    current = today or datetime.now(PT).date()
+    if end > current:
+        raise QueryError("end_date must not be later than the current America/Los_Angeles date")
+    if not 1 <= window_days <= 480:
+        raise QueryError("date range must contain from 1 to 480 inclusive days")
+    return start.isoformat(), end.isoformat(), window_days
+
+
+def validate_dimensions(values: Iterable[str], data_state: str) -> list[str]:
+    dimensions = list(values)
+    if not dimensions or any(value not in DIMENSIONS for value in dimensions):
+        raise QueryError(f"dimensions must be selected from: {', '.join(sorted(DIMENSIONS))}")
+    if len(set(dimensions)) != len(dimensions):
+        raise QueryError("dimensions must not contain duplicates")
+    if data_state == "hourly_all" and "hour" not in dimensions:
+        raise QueryError("hourly_all requires the hour dimension")
+    return dimensions
+
+
+def parse_filters(values: Iterable[str]) -> list[dict[str, str]]:
+    filters: list[dict[str, str]] = []
+    for value in values:
+        parts = value.split(":", 2)
+        if len(parts) != 3:
+            raise QueryError("filters must use dimension:operator:expression")
+        dimension, operator, expression = parts
+        if dimension not in FILTER_DIMENSIONS:
+            raise QueryError(f"filter dimension must be selected from: {', '.join(sorted(FILTER_DIMENSIONS))}")
+        if operator not in FILTER_OPERATORS:
+            raise QueryError(f"filter operator must be selected from: {', '.join(sorted(FILTER_OPERATORS))}")
+        if not expression or len(expression) > 4096 or any(ord(char) < 32 for char in expression):
+            raise QueryError("filter expression must be nonempty, control-free, and at most 4096 characters")
+        if dimension == "device" and operator in {"equals", "notEquals"} and expression not in {"DESKTOP", "MOBILE", "TABLET"}:
+            raise QueryError("exact device filters must use DESKTOP, MOBILE, or TABLET")
+        if dimension == "country" and operator in {"equals", "notEquals"} and not re.fullmatch(r"[A-Z]{3}", expression):
+            raise QueryError("exact country filters must use an uppercase ISO 3166-1 alpha-3 code")
+        filters.append({"dimension": dimension, "operator": operator, "expression": expression})
+    return filters
+
+
+def transient_status(exc: Exception) -> int | None:
+    response = getattr(exc, "resp", None)
+    status = getattr(response, "status", None)
+    if isinstance(status, int):
+        return status
+    code = getattr(exc, "status_code", None)
+    return code if isinstance(code, int) else None
+
+
+def execute_with_retries(
+    request_factory: Callable[[], Any], retries: int, sleep: Callable[[float], None] = time.sleep
+) -> dict[str, Any]:
+    for attempt in range(retries + 1):
+        try:
+            result = request_factory().execute(num_retries=0)
+            if not isinstance(result, dict):
+                raise QueryError("Google API returned a non-object response")
+            return result
+        except QueryError:
+            raise
+        except Exception as exc:
+            if attempt < retries and (transient_status(exc) in TRANSIENT_STATUS or isinstance(exc, (TimeoutError, ConnectionError))):
+                sleep(min(2**attempt, 8))
+                continue
+            raise QueryError("Google API request failed") from None
+    raise QueryError("Google API request failed")
+
+
+def build_service(token_file: str):
+    credentials = load_stored_credentials(token_file)
+    try:
+        from googleapiclient.discovery import build
+    except ImportError as exc:
+        raise QueryError("Search Console dependencies are not installed; use requirements.txt") from exc
+    return build("searchconsole", "v1", credentials=credentials, cache_discovery=False)
+
+
+def validate_freshness_metadata(
+    metadata: Any,
+    dimensions: list[str],
+    data_state: str,
+) -> dict[str, str]:
+    if not isinstance(metadata, dict):
+        raise QueryError("Search Analytics metadata must be an object")
+    if data_state not in DATA_STATES:
+        raise QueryError("Search Analytics data_state is invalid")
+
+    allowed_fields: set[str]
+    if data_state == "final":
+        allowed_fields = set()
+    elif data_state == "all":
+        allowed_fields = {"first_incomplete_date"} if "date" in dimensions else set()
+    else:
+        allowed_fields = {"first_incomplete_hour"}
+
+    unexpected = set(metadata) - allowed_fields
+    if unexpected:
+        raise QueryError(
+            f"Search Analytics metadata contradicts data_state {data_state} or requested dimensions"
+        )
+
+    incomplete_date = metadata.get("first_incomplete_date")
+    if "first_incomplete_date" in metadata:
+        if not isinstance(incomplete_date, str) or not incomplete_date:
+            raise QueryError("first_incomplete_date must be a nonempty string")
+        parse_iso_date(incomplete_date, "first_incomplete_date")
+
+    incomplete_hour = metadata.get("first_incomplete_hour")
+    if "first_incomplete_hour" in metadata:
+        if not isinstance(incomplete_hour, str) or not incomplete_hour:
+            raise QueryError("first_incomplete_hour must be a nonempty string")
+        try:
+            parsed_hour = datetime.fromisoformat(incomplete_hour.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise QueryError("first_incomplete_hour must be an ISO 8601 offset date-time") from exc
+        if parsed_hour.tzinfo is None:
+            raise QueryError("first_incomplete_hour must include an offset")
+    return metadata
+
+
+def validate_search_page(
+    response: dict[str, Any],
+    dimensions: list[str],
+    data_state: str,
+) -> list[dict[str, Any]]:
+    rows = response.get("rows", [])
+    if not isinstance(rows, list):
+        raise QueryError("Search Analytics rows must be an array")
+    for row in rows:
+        if not isinstance(row, dict):
+            raise QueryError("Search Analytics row must be an object")
+        keys = row.get("keys")
+        if not isinstance(keys, list) or len(keys) != len(dimensions) or any(not isinstance(key, str) for key in keys):
+            raise QueryError("Search Analytics row keys do not match requested dimensions")
+        for metric in ("clicks", "impressions", "ctr", "position"):
+            value = row.get(metric)
+            try:
+                is_finite = math.isfinite(value) if isinstance(value, (int, float)) else False
+            except OverflowError:
+                is_finite = False
+            if isinstance(value, bool) or not is_finite or value < 0:
+                raise QueryError(f"Search Analytics row has invalid {metric}")
+        if row["ctr"] > 1:
+            raise QueryError("Search Analytics ctr must be from 0 through 1")
+    validate_freshness_metadata(response.get("metadata", {}), dimensions, data_state)
+    return rows
+
+
+def query_search_analytics(
+    service: Any,
+    *,
+    site: str,
+    start_date: str,
+    end_date: str,
+    dimensions: list[str],
+    search_type: str,
+    data_state: str,
+    filters: list[dict[str, str]],
+    limit: int,
+    page_size: int,
+    max_pages: int,
+    retries: int,
+    sleep: Callable[[float], None] = time.sleep,
+) -> dict[str, Any]:
+    site = validate_site(site)
+    parse_iso_date(start_date, "start_date")
+    parse_iso_date(end_date, "end_date")
+    if start_date > end_date:
+        raise QueryError("start_date must be on or before end_date")
+    dimensions = validate_dimensions(dimensions, data_state)
+    if search_type not in SEARCH_TYPES:
+        raise QueryError(f"search_type must be selected from: {', '.join(sorted(SEARCH_TYPES))}")
+    if not 1 <= limit <= 500_000:
+        raise QueryError("limit must be from 1 to 500000")
+    if not 1 <= page_size <= 25_000:
+        raise QueryError("page_size must be from 1 to 25000")
+    if not 1 <= max_pages <= 20:
+        raise QueryError("max_pages must be from 1 to 20")
+
+    base_body: dict[str, Any] = {
         "startDate": start_date,
         "endDate": end_date,
         "dimensions": dimensions,
-        "rowLimit": row_limit,
-        "dataState": "final"
+        "type": search_type,
+        "dataState": data_state,
     }
-    
-    try:
-        response = service.searchanalytics().query(siteUrl=site_url, body=request).execute()
-        return response
-    except HttpError as e:
-        print(f"ERROR: API request failed: {e}")
-        sys.exit(1)
+    if filters:
+        base_body["dimensionFilterGroups"] = [{"groupType": "and", "filters": filters}]
 
+    all_rows: list[dict[str, Any]] = []
+    pages = 0
+    start_row = 0
+    has_more = False
+    response_aggregation_type: str | None = None
+    freshness: dict[str, str] = {"data_state": data_state, "time_zone": "America/Los_Angeles"}
+    while pages < max_pages and len(all_rows) < limit:
+        requested = min(page_size, limit - len(all_rows))
+        body = {**base_body, "startRow": start_row, "rowLimit": requested}
+        response = execute_with_retries(
+            lambda body=body: service.searchanalytics().query(siteUrl=site, body=body), retries, sleep
+        )
+        page_rows = validate_search_page(response, dimensions, data_state)
+        if len(page_rows) > requested:
+            raise QueryError("Search Analytics returned more rows than requested")
+        metadata = response.get("metadata", {})
+        page_aggregation_type = response.get("responseAggregationType")
+        if page_aggregation_type is not None:
+            if page_aggregation_type not in {"auto", "byPage", "byProperty"}:
+                raise QueryError("Search Analytics responseAggregationType is malformed")
+            if response_aggregation_type is not None and response_aggregation_type != page_aggregation_type:
+                raise QueryError("Search Analytics responseAggregationType changed between pages")
+            response_aggregation_type = page_aggregation_type
+        for name, value in metadata.items():
+            if name in freshness and freshness[name] != value:
+                raise QueryError("Search Analytics freshness metadata changed between pages")
+            freshness[name] = value
+        all_rows.extend(page_rows)
+        pages += 1
+        start_row += len(page_rows)
+        if len(page_rows) < requested:
+            has_more = False
+            break
+        has_more = True
 
-def top_queries(site_url: str, days: int = 28, limit: int = 20):
-    """Get top search queries."""
-    response = search_analytics(site_url, days=days, dimensions=["query"], row_limit=limit)
-    rows = response.get("rows", [])
-    
-    if not rows:
-        print("No query data found.")
-        return
-    
-    print(f"Top {len(rows)} queries (last {days} days):\n")
-    print(f"{'Query':<50} {'Clicks':>8} {'Impressions':>12} {'CTR':>8} {'Position':>10}")
-    print("-" * 92)
-    
-    for row in rows:
-        query = row["keys"][0][:48]
-        clicks = row.get("clicks", 0)
-        impressions = row.get("impressions", 0)
-        ctr = row.get("ctr", 0) * 100
-        position = row.get("position", 0)
-        print(f"{query:<50} {clicks:>8} {impressions:>12} {ctr:>7.1f}% {position:>10.1f}")
-
-
-def top_pages(site_url: str, days: int = 28, limit: int = 20):
-    """Get top pages by clicks."""
-    response = search_analytics(site_url, days=days, dimensions=["page"], row_limit=limit)
-    rows = response.get("rows", [])
-    
-    if not rows:
-        print("No page data found.")
-        return
-    
-    print(f"Top {len(rows)} pages (last {days} days):\n")
-    print(f"{'Page':<70} {'Clicks':>8} {'Impressions':>12} {'CTR':>8} {'Position':>10}")
-    print("-" * 112)
-    
-    for row in rows:
-        page = row["keys"][0]
-        # Truncate long URLs
-        if len(page) > 68:
-            page = page[:65] + "..."
-        clicks = row.get("clicks", 0)
-        impressions = row.get("impressions", 0)
-        ctr = row.get("ctr", 0) * 100
-        position = row.get("position", 0)
-        print(f"{page:<70} {clicks:>8} {impressions:>12} {ctr:>7.1f}% {position:>10.1f}")
-
-
-def query_page_analysis(site_url: str, days: int = 28, limit: int = 50):
-    """Get query-page combinations for deeper analysis."""
-    response = search_analytics(site_url, days=days, dimensions=["query", "page"], row_limit=limit)
-    rows = response.get("rows", [])
-    
-    if not rows:
-        print("No data found.")
-        return
-    
-    # Output as JSON for easier parsing
-    print(json.dumps(rows, indent=2))
-
-
-def low_ctr_opportunities(site_url: str, days: int = 28, min_impressions: int = 100):
-    """Find high-impression, low-CTR opportunities."""
-    response = search_analytics(site_url, days=days, dimensions=["query", "page"], row_limit=500)
-    rows = response.get("rows", [])
-    
-    if not rows:
-        print("No data found.")
-        return
-    
-    # Filter for high impressions, low CTR
-    opportunities = [
-        row for row in rows 
-        if row.get("impressions", 0) >= min_impressions and row.get("ctr", 0) < 0.03
-    ]
-    
-    # Sort by impressions descending
-    opportunities.sort(key=lambda x: x.get("impressions", 0), reverse=True)
-    
-    print(f"Low CTR Opportunities (impressions >= {min_impressions}, CTR < 3%):\n")
-    print(f"{'Query':<40} {'Page':<50} {'Impr':>8} {'CTR':>7} {'Pos':>6}")
-    print("-" * 115)
-    
-    for row in opportunities[:20]:
-        query = row["keys"][0][:38]
-        page = row["keys"][1]
-        if len(page) > 48:
-            page = "..." + page[-45:]
-        impressions = row.get("impressions", 0)
-        ctr = row.get("ctr", 0) * 100
-        position = row.get("position", 0)
-        print(f"{query:<40} {page:<50} {impressions:>8} {ctr:>6.1f}% {position:>6.1f}")
-
-
-def inspect_url(site_url: str, url: str):
-    """Inspect a specific URL's indexing status."""
-    service = get_service()
-    
-    # URL inspection requires the full URL
-    if not url.startswith("http"):
-        url = site_url.rstrip("/") + "/" + url.lstrip("/")
-    
-    request = {
-        "inspectionUrl": url,
-        "siteUrl": site_url
+    partial = has_more and (pages >= max_pages or len(all_rows) >= limit)
+    return {
+        "query": base_body,
+        "freshness": freshness,
+        "response_aggregation_type": response_aggregation_type,
+        "pagination": {
+            "pages": pages,
+            "returned": len(all_rows),
+            "limit": limit,
+            "page_size": page_size,
+            "max_pages": max_pages,
+            "next_start_row": start_row if has_more else None,
+            "has_more": has_more,
+            "partial": partial,
+            "provider_top_rows_only": True,
+        },
+        "rows": all_rows,
     }
-    
+
+
+def list_sites(service: Any, retries: int, sleep: Callable[[float], None] = time.sleep) -> dict[str, Any]:
+    response = execute_with_retries(lambda: service.sites().list(), retries, sleep)
+    entries = response.get("siteEntry", [])
+    if not isinstance(entries, list):
+        raise QueryError("sites response must contain a siteEntry array")
+    sites: list[dict[str, str]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("siteUrl"), str) or not isinstance(entry.get("permissionLevel"), str):
+            raise QueryError("sites response contains a malformed entry")
+        sites.append({"siteUrl": validate_site(entry["siteUrl"]), "permissionLevel": entry["permissionLevel"]})
+    return {"returned": len(sites), "sites": sites}
+
+
+def list_sitemaps(service: Any, site: str, retries: int, sleep: Callable[[float], None] = time.sleep) -> dict[str, Any]:
+    site = validate_site(site)
+    response = execute_with_retries(lambda: service.sitemaps().list(siteUrl=site), retries, sleep)
+    entries = response.get("sitemap", [])
+    if not isinstance(entries, list):
+        raise QueryError("sitemaps response must contain a sitemap array")
+    fields = ("path", "type", "lastSubmitted", "lastDownloaded", "isPending", "isSitemapsIndex", "warnings", "errors")
+    sitemaps: list[dict[str, Any]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str) or not entry["path"]:
+            raise QueryError("sitemaps response contains a malformed entry")
+        sitemaps.append({name: entry[name] for name in fields if name in entry})
+    return {"site": site, "returned": len(sitemaps), "sitemaps": sitemaps}
+
+
+def inspect_url(service: Any, site: str, url: str, retries: int, sleep: Callable[[float], None] = time.sleep) -> dict[str, Any]:
+    site = validate_site(site)
+    inspection_url = validate_inspection_url(site, url)
+    response = execute_with_retries(
+        lambda: service.urlInspection().index().inspect(body={"inspectionUrl": inspection_url, "siteUrl": site}),
+        retries,
+        sleep,
+    )
+    result = response.get("inspectionResult")
+    if not isinstance(result, dict):
+        raise QueryError("URL Inspection response is missing inspectionResult")
+    return {"site": site, "inspectionUrl": inspection_url, "inspectionResult": result}
+
+
+def add_search_args(parser: argparse.ArgumentParser, dimensions: list[str] | None = None, default_limit: int = 1000) -> None:
+    parser.add_argument("--site", required=True)
+    parser.add_argument("--days", type=bounded_int(1, 480))
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
+    parser.add_argument("--data-state", choices=sorted(DATA_STATES), default="final")
+    if dimensions is None:
+        parser.add_argument("--dimensions", nargs="+", default=["query", "page"])
+    parser.set_defaults(fixed_dimensions=dimensions)
+    parser.add_argument("--search-type", choices=sorted(SEARCH_TYPES), default="web")
+    parser.add_argument("--filter", action="append", default=[], metavar="DIMENSION:OPERATOR:EXPRESSION")
+    parser.add_argument("--limit", type=bounded_int(1, 500_000), default=default_limit)
+    parser.add_argument("--page-size", type=bounded_int(1, 25_000), default=25_000)
+    parser.add_argument("--max-pages", type=bounded_int(1, 20), default=5)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Read-only Google Search Console helper", allow_abbrev=False)
+    parser.add_argument("--token-file", default=str(DEFAULT_TOKEN_FILE), help="protected OAuth token JSON path")
+    parser.add_argument("--retries", type=bounded_int(0, 5), default=3)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser("sites", help="list accessible properties", allow_abbrev=False)
+    add_search_args(subparsers.add_parser("search-analytics", allow_abbrev=False))
+    add_search_args(subparsers.add_parser("top-queries", allow_abbrev=False), ["query"], 20)
+    add_search_args(subparsers.add_parser("top-pages", allow_abbrev=False), ["page"], 20)
+    add_search_args(subparsers.add_parser("query-page", allow_abbrev=False), ["query", "page"], 50)
+    opportunities = subparsers.add_parser("opportunities", allow_abbrev=False)
+    add_search_args(opportunities, ["query", "page"], 500)
+    opportunities.add_argument("--min-impressions", type=bounded_int(1, 1_000_000_000), default=100)
+    inspection = subparsers.add_parser("inspect-url", allow_abbrev=False)
+    inspection.add_argument("--site", required=True)
+    inspection.add_argument("--url", required=True)
+    sitemap_parser = subparsers.add_parser("sitemaps", allow_abbrev=False)
+    sitemap_parser.add_argument("--site", required=True)
+    args = parser.parse_args(argv)
+
     try:
-        response = service.urlInspection().index().inspect(body=request).execute()
-        result = response.get("inspectionResult", {})
-        
-        print(f"URL Inspection: {url}\n")
-        
-        # Index status
-        index_status = result.get("indexStatusResult", {})
-        print("Index Status:")
-        print(f"  Verdict: {index_status.get('verdict', 'Unknown')}")
-        print(f"  Coverage State: {index_status.get('coverageState', 'Unknown')}")
-        print(f"  Crawled As: {index_status.get('crawledAs', 'Unknown')}")
-        print(f"  Last Crawl Time: {index_status.get('lastCrawlTime', 'Unknown')}")
-        
-        # Mobile usability
-        mobile = result.get("mobileUsabilityResult", {})
-        if mobile:
-            print(f"\nMobile Usability:")
-            print(f"  Verdict: {mobile.get('verdict', 'Unknown')}")
-        
-        # Rich results
-        rich = result.get("richResultsResult", {})
-        if rich:
-            print(f"\nRich Results:")
-            print(f"  Verdict: {rich.get('verdict', 'Unknown')}")
-            
-    except HttpError as e:
-        print(f"ERROR: URL inspection failed: {e}")
-
-
-def list_sitemaps(site_url: str):
-    """List all sitemaps for a site."""
-    service = get_service()
-    
-    try:
-        response = service.sitemaps().list(siteUrl=site_url).execute()
-        sitemaps = response.get("sitemap", [])
-        
-        if not sitemaps:
-            print("No sitemaps found.")
-            return
-        
-        print(f"Sitemaps for {site_url}:\n")
-        for sm in sitemaps:
-            print(f"  {sm.get('path')}")
-            print(f"    Type: {sm.get('type', 'Unknown')}")
-            print(f"    Last Submitted: {sm.get('lastSubmitted', 'Unknown')}")
-            print(f"    Last Downloaded: {sm.get('lastDownloaded', 'Unknown')}")
-            print(f"    Warnings: {sm.get('warnings', 0)}")
-            print(f"    Errors: {sm.get('errors', 0)}")
-            print()
-            
-    except HttpError as e:
-        print(f"ERROR: Failed to list sitemaps: {e}")
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Google Search Console Query Tool")
-    subparsers = parser.add_subparsers(dest="command", help="Command to run")
-    
-    # sites command
-    subparsers.add_parser("sites", help="List all sites in Search Console")
-    
-    # search-analytics command
-    sa_parser = subparsers.add_parser("search-analytics", help="Raw search analytics query")
-    sa_parser.add_argument("--site", required=True, help="Site URL (e.g., https://example.com)")
-    sa_parser.add_argument("--days", type=int, default=28, help="Number of days (default: 28)")
-    sa_parser.add_argument("--dimensions", nargs="+", default=["query", "page"],
-                          help="Dimensions: query, page, country, device, date")
-    sa_parser.add_argument("--limit", type=int, default=100, help="Row limit")
-    
-    # top-queries command
-    tq_parser = subparsers.add_parser("top-queries", help="Get top search queries")
-    tq_parser.add_argument("--site", required=True, help="Site URL")
-    tq_parser.add_argument("--days", type=int, default=28, help="Number of days")
-    tq_parser.add_argument("--limit", type=int, default=20, help="Number of results")
-    
-    # top-pages command
-    tp_parser = subparsers.add_parser("top-pages", help="Get top pages")
-    tp_parser.add_argument("--site", required=True, help="Site URL")
-    tp_parser.add_argument("--days", type=int, default=28, help="Number of days")
-    tp_parser.add_argument("--limit", type=int, default=20, help="Number of results")
-    
-    # opportunities command
-    opp_parser = subparsers.add_parser("opportunities", help="Find low-CTR optimization opportunities")
-    opp_parser.add_argument("--site", required=True, help="Site URL")
-    opp_parser.add_argument("--days", type=int, default=28, help="Number of days")
-    opp_parser.add_argument("--min-impressions", type=int, default=100, help="Minimum impressions")
-    
-    # inspect-url command
-    iu_parser = subparsers.add_parser("inspect-url", help="Inspect URL indexing status")
-    iu_parser.add_argument("--site", required=True, help="Site URL")
-    iu_parser.add_argument("--url", required=True, help="URL to inspect")
-    
-    # sitemaps command
-    sm_parser = subparsers.add_parser("sitemaps", help="List sitemaps")
-    sm_parser.add_argument("--site", required=True, help="Site URL")
-    
-    # query-page command (JSON output)
-    qp_parser = subparsers.add_parser("query-page", help="Query-page combinations (JSON)")
-    qp_parser.add_argument("--site", required=True, help="Site URL")
-    qp_parser.add_argument("--days", type=int, default=28, help="Number of days")
-    qp_parser.add_argument("--limit", type=int, default=50, help="Row limit")
-    
-    args = parser.parse_args()
-    
-    if not args.command:
-        parser.print_help()
-        sys.exit(1)
-    
-    if args.command == "sites":
-        list_sites()
-    elif args.command == "search-analytics":
-        response = search_analytics(args.site, args.days, args.dimensions, args.limit)
-        print(json.dumps(response, indent=2))
-    elif args.command == "top-queries":
-        top_queries(args.site, args.days, args.limit)
-    elif args.command == "top-pages":
-        top_pages(args.site, args.days, args.limit)
-    elif args.command == "opportunities":
-        low_ctr_opportunities(args.site, args.days, args.min_impressions)
-    elif args.command == "inspect-url":
-        inspect_url(args.site, args.url)
-    elif args.command == "sitemaps":
-        list_sitemaps(args.site)
-    elif args.command == "query-page":
-        query_page_analysis(args.site, args.days, args.limit)
+        if args.command in {"search-analytics", "top-queries", "top-pages", "query-page", "opportunities"}:
+            validate_site(args.site)
+            dimensions = args.fixed_dimensions or args.dimensions
+            dimensions = validate_dimensions(dimensions, args.data_state)
+            filters = parse_filters(args.filter)
+            start_date, end_date, _ = resolve_date_range(
+                days=args.days,
+                start_date=args.start_date,
+                end_date=args.end_date,
+                data_state=args.data_state,
+            )
+        elif args.command == "sitemaps":
+            validate_site(args.site)
+        elif args.command == "inspect-url":
+            validated_site = validate_site(args.site)
+            validate_inspection_url(validated_site, args.url)
+        service = build_service(args.token_file)
+        if args.command == "sites":
+            output = list_sites(service, args.retries)
+        elif args.command == "sitemaps":
+            output = list_sitemaps(service, args.site, args.retries)
+        elif args.command == "inspect-url":
+            output = inspect_url(service, args.site, args.url, args.retries)
+        else:
+            output = query_search_analytics(
+                service,
+                site=args.site,
+                start_date=start_date,
+                end_date=end_date,
+                dimensions=dimensions,
+                search_type=args.search_type,
+                data_state=args.data_state,
+                filters=filters,
+                limit=args.limit,
+                page_size=args.page_size,
+                max_pages=args.max_pages,
+                retries=args.retries,
+            )
+            if args.command == "opportunities":
+                source_rows = output["rows"]
+                output["rows"] = [
+                    row for row in source_rows if row["impressions"] >= args.min_impressions and row["ctr"] < 0.03
+                ]
+                output["opportunity_filter"] = {"min_impressions": args.min_impressions, "max_ctr_exclusive": 0.03}
+                output["opportunities_returned"] = len(output["rows"])
+        print(json.dumps(output, indent=2, sort_keys=True))
+        return 0
+    except (AuthError, QueryError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

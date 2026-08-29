@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+*.py[cod]
+client_secret*.json
+credentials*.json
+token*.json
+tests/
+_meta.json

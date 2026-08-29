@@ -1,104 +1,176 @@
 #!/usr/bin/env python3
-"""
-GA4 OAuth Setup Script
+"""Protected installed-app OAuth setup for read-only GA4 Data API access."""
 
-Generates OAuth authorization URL and exchanges code for refresh token.
-"""
+from __future__ import annotations
 
 import argparse
+import json
+import os
+from pathlib import Path
+import stat
 import sys
-import urllib.parse
-
-try:
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    import google.auth.transport.requests
-except ImportError:
-    print("Missing dependencies. Install with:")
-    print("  pip install google-auth-oauthlib")
-    sys.exit(1)
-
-SCOPES = ["https://www.googleapis.com/auth/analytics.readonly"]
+import tempfile
+from typing import Any
 
 
-def generate_auth_url(client_id, redirect_uri="http://localhost:8080/"):
-    """Generate OAuth authorization URL."""
-    params = {
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "scope": " ".join(SCOPES),
-        "response_type": "code",
-        "access_type": "offline",
-        "prompt": "consent",
-    }
-    base_url = "https://accounts.google.com/o/oauth2/auth"
-    return f"{base_url}?{urllib.parse.urlencode(params)}"
+SCOPES = ("https://www.googleapis.com/auth/analytics.readonly",)
+DEFAULT_CONFIG_DIR = Path.home() / ".config" / "ga4"
+DEFAULT_CLIENT_FILE = DEFAULT_CONFIG_DIR / "client_secret.json"
+DEFAULT_TOKEN_FILE = DEFAULT_CONFIG_DIR / "token.json"
 
 
-def exchange_code(client_id, client_secret, code, redirect_uri="http://localhost:8080/"):
-    """Exchange authorization code for tokens."""
-    import requests
-    
-    response = requests.post(
-        "https://oauth2.googleapis.com/token",
-        data={
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "code": code,
-            "grant_type": "authorization_code",
-            "redirect_uri": redirect_uri,
-        },
-    )
-    
-    if response.status_code != 200:
-        print(f"Error: {response.text}")
-        sys.exit(1)
-    
-    return response.json()
+class AuthError(RuntimeError):
+    """Safe, non-secret authentication configuration error."""
 
 
-def main():
-    parser = argparse.ArgumentParser(description="GA4 OAuth Setup")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    
-    # Generate auth URL
-    url_parser = subparsers.add_parser("url", help="Generate OAuth URL")
-    url_parser.add_argument("--client-id", required=True, help="OAuth Client ID")
-    url_parser.add_argument("--redirect-uri", default="http://localhost:8080/", help="Redirect URI")
-    
-    # Exchange code
-    exchange_parser = subparsers.add_parser("exchange", help="Exchange code for tokens")
-    exchange_parser.add_argument("--client-id", required=True, help="OAuth Client ID")
-    exchange_parser.add_argument("--client-secret", required=True, help="OAuth Client Secret")
-    exchange_parser.add_argument("--code", required=True, help="Authorization code")
-    exchange_parser.add_argument("--redirect-uri", default="http://localhost:8080/", help="Redirect URI")
-    
-    args = parser.parse_args()
-    
-    if args.command == "url":
-        url = generate_auth_url(args.client_id, args.redirect_uri)
-        print("\n=== GA4 OAuth Authorization ===\n")
-        print("1. Open this URL in your browser:")
-        print(f"\n{url}\n")
-        print("2. Sign in and authorize access to Analytics")
-        print("3. Copy the 'code' parameter from the redirect URL")
-        print("4. Run: ga4_auth.py exchange --client-id ... --client-secret ... --code ...")
-        
-    elif args.command == "exchange":
-        print("Exchanging code for tokens...")
-        tokens = exchange_code(
-            args.client_id,
-            args.client_secret,
-            args.code,
-            args.redirect_uri,
+def local_path(value: str | os.PathLike[str]) -> Path:
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else Path.cwd() / path
+
+
+def require_private_directory(path: Path) -> None:
+    if path.is_symlink() or not path.is_dir():
+        raise AuthError(f"credential directory must be a real directory: {path}")
+    info = path.stat()
+    if info.st_uid != os.getuid():
+        raise AuthError(f"credential directory must be owned by the current user: {path}")
+    if stat.S_IMODE(info.st_mode) & 0o077:
+        raise AuthError(f"credential directory must reject group and other access: {path}")
+
+
+def ensure_private_directory(path: Path) -> None:
+    if not path.exists():
+        old_umask = os.umask(0o077)
+        try:
+            path.mkdir(mode=0o700, parents=True)
+        finally:
+            os.umask(old_umask)
+    require_private_directory(path)
+
+
+def require_private_file(path_value: str | os.PathLike[str]) -> Path:
+    path = local_path(path_value)
+    require_private_directory(path.parent)
+    if path.is_symlink() or not path.is_file():
+        raise AuthError(f"credential file must be a regular non-symbolic-link file: {path}")
+    info = path.stat()
+    if info.st_uid != os.getuid():
+        raise AuthError(f"credential file must be owned by the current user: {path}")
+    if stat.S_IMODE(info.st_mode) != 0o600:
+        raise AuthError(f"credential file must have mode 0600: {path}")
+    return path
+
+
+def validate_installed_client_file(path_value: str | os.PathLike[str]) -> Path:
+    path = require_private_file(path_value)
+    try:
+        payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise AuthError("client credential JSON is unreadable or malformed") from exc
+    installed = payload.get("installed") if isinstance(payload, dict) else None
+    if not isinstance(installed, dict):
+        raise AuthError("client credential JSON must contain a Desktop app 'installed' object")
+    for field in ("client_id", "client_secret", "auth_uri", "token_uri"):
+        if not isinstance(installed.get(field), str) or not installed[field]:
+            raise AuthError(f"client credential JSON is missing installed.{field}")
+    return path
+
+
+def write_private_token(path_value: str | os.PathLike[str], payload: str) -> Path:
+    path = local_path(path_value)
+    ensure_private_directory(path.parent)
+    if path.exists():
+        require_private_file(path)
+    elif path.is_symlink():
+        raise AuthError(f"token path must not be a symbolic link: {path}")
+    descriptor = -1
+    temporary = ""
+    try:
+        descriptor, temporary = tempfile.mkstemp(prefix=".token-", dir=path.parent, text=True)
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            descriptor = -1
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        temporary = ""
+        os.chmod(path, 0o600)
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if temporary:
+            try:
+                os.unlink(temporary)
+            except FileNotFoundError:
+                pass
+    return path
+
+
+def load_stored_credentials(path_value: str | os.PathLike[str]):
+    path = require_private_file(path_value)
+    try:
+        from google.oauth2.credentials import Credentials
+    except ImportError as exc:
+        raise AuthError("Google OAuth dependencies are not installed; use requirements.txt") from exc
+    try:
+        return Credentials.from_authorized_user_file(str(path), scopes=SCOPES)
+    except Exception as exc:
+        raise AuthError("stored OAuth token is unreadable or invalid; re-run ga4_auth.py") from exc
+
+
+def parse_port(value: str) -> int:
+    try:
+        port = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("port must be 0 or an integer from 1024 to 65535") from exc
+    if port != 0 and not 1024 <= port <= 65535:
+        raise argparse.ArgumentTypeError("port must be 0 or an integer from 1024 to 65535")
+    return port
+
+
+def authorize(client_file: Path, token_file: Path, port: int) -> Path:
+    try:
+        from google_auth_oauthlib.flow import InstalledAppFlow
+    except ImportError as exc:
+        raise AuthError("Google OAuth dependencies are not installed; use requirements.txt") from exc
+    try:
+        flow = InstalledAppFlow.from_client_secrets_file(str(client_file), scopes=SCOPES)
+        credentials = flow.run_local_server(
+            host="127.0.0.1",
+            port=port,
+            open_browser=True,
+            access_type="offline",
+            prompt="consent",
+            authorization_prompt_message="Complete authorization in the browser window.",
+            success_message="Authorization complete. You may close this browser window.",
         )
-        print("\n=== OAuth Tokens ===\n")
-        print(f"Access Token: {tokens.get('access_token', 'N/A')[:50]}...")
-        print(f"Refresh Token: {tokens.get('refresh_token', 'N/A')}")
-        print(f"Expires In: {tokens.get('expires_in', 'N/A')} seconds")
-        print("\n=== Environment Variables ===\n")
-        print("Add these to your .env or export them:\n")
-        print(f"export GOOGLE_REFRESH_TOKEN='{tokens.get('refresh_token')}'")
+        token_json = credentials.to_json()
+    except Exception as exc:
+        raise AuthError("interactive OAuth failed; no token was written") from exc
+    return write_private_token(token_file, token_json)
+
+
+def main(argv: list[str] | None = None) -> int:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    forbidden = {"--access-token", "--authorization-code", "--client-secret", "--code", "--refresh-token"}
+    if any(argument.split("=", 1)[0] in forbidden for argument in arguments):
+        print("Error: credential values and authorization codes must not be passed in arguments", file=sys.stderr)
+        return 1
+    parser = argparse.ArgumentParser(description="Authorize read-only GA4 Data API access", allow_abbrev=False)
+    parser.add_argument("--client-secrets", default=str(DEFAULT_CLIENT_FILE), help="protected Desktop OAuth client JSON path")
+    parser.add_argument("--token-file", default=str(DEFAULT_TOKEN_FILE), help="protected token JSON destination")
+    parser.add_argument("--port", type=parse_port, default=0, help="loopback port; 0 selects an available port")
+    args = parser.parse_args(arguments)
+    try:
+        client_file = validate_installed_client_file(args.client_secrets)
+        token_file = authorize(client_file, local_path(args.token_file), args.port)
+    except AuthError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Authorization complete. Protected credentials stored at {token_file}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

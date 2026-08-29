@@ -1,0 +1,91 @@
+{
+  "cases": [
+    {
+      "id": "docx-to-pdf",
+      "request": "Convert proposal.docx to proposal.pdf",
+      "tools": ["nutrient_convert_to_pdf"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "pages": "unknown with bounded conversion assumption"
+    },
+    {
+      "id": "selected-page-render",
+      "request": "Render pages 2 through 4 of contract.pdf as PNG",
+      "tools": ["nutrient_convert_to_image"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "pages": "2-4 inclusive"
+    },
+    {
+      "id": "ocr-then-extract",
+      "request": "OCR scan.pdf, then extract its text",
+      "tools": ["nutrient_ocr", "nutrient_extract_text"],
+      "metered_calls": 2,
+      "action_confirmations": 2,
+      "separate_stage_approval": true
+    },
+    {
+      "id": "deterministic-redaction",
+      "request": "Redact all email addresses from records.pdf",
+      "tools": ["nutrient_redact"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "human_output_review": true
+    },
+    {
+      "id": "semantic-redaction",
+      "request": "Remove contextual medical details from disclosure.pdf",
+      "tools": ["nutrient_ai_redact"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "preserve_source": true,
+      "candidate_output": true,
+      "human_output_review": true,
+      "no_dry_run_disclosed": true
+    },
+    {
+      "id": "ai-redaction-render-review",
+      "request": "AI-redact disclosure.pdf, then render it for review",
+      "tools": ["nutrient_ai_redact", "nutrient_convert_to_image"],
+      "metered_calls": 2,
+      "action_confirmations": 2,
+      "separate_stage_approval": true,
+      "human_output_review": true
+    },
+    {
+      "id": "signing-boundary",
+      "request": "Digitally sign agreement.pdf",
+      "tools": ["nutrient_sign"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "legal_authority_gate": true,
+      "not_identity_proof": true,
+      "preserve_source": true
+    },
+    {
+      "id": "local-credit-context",
+      "request": "Check credits, then OCR invoice.pdf",
+      "tools": ["nutrient_check_credits", "nutrient_ocr"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "credit_check_is_local_prior_state": true,
+      "credit_check_does_not_authorize": true
+    },
+    {
+      "id": "retry-after-failure",
+      "request": "Retry the failed watermark operation once",
+      "tools": ["nutrient_watermark", "nutrient_watermark"],
+      "metered_calls": 2,
+      "action_confirmations": 2,
+      "retry_requires_fresh_estimate": true
+    },
+    {
+      "id": "unknown-page-count",
+      "request": "Convert unknown.pdf to DOCX",
+      "tools": ["nutrient_convert_to_office"],
+      "metered_calls": 1,
+      "action_confirmations": 1,
+      "pages": "unknown; block until bounded estimate"
+    }
+  ]
+}
