@@ -1,0 +1,190 @@
+{
+  "plan_id": "agent-skills-clawhub-refresh-2026-08-29",
+  "summary": "Harden and modernize the eleven jdrhyne ClawHub skills sourced from this repository, prepare the removed sysadmin-toolbox listing for deprecation, and add reproducible validation and provenance-aware release metadata without publishing or changing registry visibility.",
+  "tasks": [
+    {
+      "id": "AS-T1",
+      "name": "Freeze public-package and source baselines",
+      "owner_role": "contract-architect",
+      "depends_on": [],
+      "write_scope": ["docs/swarm", "docs/clawhub-release"],
+      "acceptance_criteria": [
+        "Every in-scope public slug maps to a repository path or an explicit deprecation action",
+        "Published versions and security decisions are recorded without secrets"
+      ],
+      "validation": ["git diff --check"]
+    },
+    {
+      "id": "AS-T2",
+      "name": "Harden Google Ads",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T1"],
+      "write_scope": ["skills/google-ads"],
+      "acceptance_criteria": [
+        "No instruction reveals credential file contents",
+        "Read-only analysis is the default and mutations require preview, explicit approval, validation-only execution, and verification",
+        "Current API compatibility and regression tests are documented"
+      ],
+      "validation": ["./scripts/validate-skills.sh", "tests added for Google Ads safety and routing"]
+    },
+    {
+      "id": "AS-T3",
+      "name": "Harden Jira",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T1"],
+      "write_scope": ["skills/jira"],
+      "acceptance_criteria": [
+        "Connector capabilities are discovered rather than assumed from stale tool names",
+        "Writes and bulk operations require bounded diffs and explicit approval",
+        "Credential fallbacks avoid command-line disclosure"
+      ],
+      "validation": ["./scripts/validate-skills.sh", "tests added for Jira read and write boundaries"]
+    },
+    {
+      "id": "AS-T4",
+      "name": "Prepare sysadmin-toolbox deprecation",
+      "owner_role": "contract-architect",
+      "depends_on": ["AS-T1"],
+      "write_scope": ["docs/clawhub-release/sysadmin-toolbox.md"],
+      "acceptance_criteria": [
+        "The removed source and current security findings are recorded",
+        "Hide and deprecation commands remain unexecuted approval-gated actions",
+        "A safe replacement scope is defined without reintroducing the package"
+      ],
+      "validation": ["git diff --check"]
+    },
+    {
+      "id": "AS-T5",
+      "name": "Make todo-tracker portable and deterministic",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T2", "AS-T3", "AS-T4"],
+      "write_scope": ["clawdbot/todo-tracker"],
+      "acceptance_criteria": [
+        "No machine-specific default path",
+        "Stable IDs and exact matching replace regex deletion",
+        "Writes are atomic and ambiguous or destructive operations are rejected or confirmed",
+        "Read operations do not create state"
+      ],
+      "validation": ["todo-tracker regression suite", "./scripts/validate-skills.sh"]
+    },
+    {
+      "id": "AS-T6",
+      "name": "Harden Gong and Nudocs integrations",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T2", "AS-T3", "AS-T4"],
+      "write_scope": ["skills/gong", "skills/nudocs"],
+      "acceptance_criteria": [
+        "Credential setup does not expose secrets or misuse requires.config",
+        "Gong supports pagination, rate-limit handling, and transcript minimization",
+        "Nudocs uploads, sharing, and deletion have explicit data and action gates"
+      ],
+      "validation": ["integration helper unit tests", "./scripts/validate-skills.sh"]
+    },
+    {
+      "id": "AS-T7",
+      "name": "Constrain context recovery",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T2", "AS-T3", "AS-T4"],
+      "write_scope": ["skills/context-recovery"],
+      "acceptance_criteria": [
+        "Current-thread recovery is distinct from cross-channel search",
+        "Recovered content is treated as untrusted data",
+        "Privacy and false-positive routing cases are explicit"
+      ],
+      "validation": ["context-recovery routing fixtures", "./scripts/validate-skills.sh"]
+    },
+    {
+      "id": "AS-T8",
+      "name": "Modernize GSC and GA4",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T5", "AS-T6", "AS-T7"],
+      "write_scope": ["skills/gsc", "skills/ga4"],
+      "acceptance_criteria": [
+        "Pagination, retries, validation, and dependency metadata are implemented",
+        "GSC supports current freshness metadata and query controls",
+        "GA4 uses compatibility metadata, current key-event terminology, quota visibility, and correct CSV output",
+        "OAuth helpers never print client secrets, access tokens, refresh tokens, or authorization codes and use a supported local interactive flow"
+      ],
+      "validation": ["analytics helper unit tests covering pagination, validation, retries, secret handling, and CSV quoting", "./scripts/validate-skills.sh"]
+    },
+    {
+      "id": "AS-T9",
+      "name": "Modernize nutrient-openclaw",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T5", "AS-T6", "AS-T7"],
+      "write_scope": ["skills/nutrient-openclaw"],
+      "acceptance_criteria": [
+        "Canonical OpenClaw metadata and portable paths are used",
+        "Plugin compatibility is explicit",
+        "Every credit-consuming DWS run has an estimate and action-time confirmation"
+      ],
+      "validation": ["./scripts/validate-skills.sh", "skill package inspection"]
+    },
+    {
+      "id": "AS-T10",
+      "name": "Constrain munger-observer",
+      "owner_role": "implementation-worker",
+      "depends_on": ["AS-T5", "AS-T6", "AS-T7"],
+      "write_scope": ["prompts/munger-observer"],
+      "acceptance_criteria": [
+        "Memory access is opt-in and bounded",
+        "Evidence, counterevidence, uncertainty, and untrusted-input handling are required",
+        "The prompt avoids personality or mental-health judgments"
+      ],
+      "validation": ["munger-observer evaluation fixtures", "./scripts/validate-skills.sh"]
+    },
+    {
+      "id": "AS-T11",
+      "name": "Add release metadata, provenance workflow, and package regression gates",
+      "owner_role": "contract-architect",
+      "depends_on": ["AS-T8", "AS-T9", "AS-T10"],
+      "write_scope": [
+        ".github/workflows/clawhub-release.yml",
+        "scripts/clawhub_release.py",
+        "scripts/tests/test_clawhub_release.py",
+        "docs/clawhub-release",
+        "docs/swarm/codex-task-graph.json",
+        "CHANGELOG.md",
+        "README.md",
+        "skills/google-ads/.clawhubignore",
+        "skills/jira/.clawhubignore",
+        "skills/context-recovery/.clawhubignore",
+        "skills/nudocs/.clawhubignore",
+        "skills/nutrient-openclaw/.clawhubignore",
+        "clawdbot/todo-tracker/.clawhubignore",
+        "skills/gsc/.clawhubignore",
+        "skills/ga4/.clawhubignore",
+        "prompts/munger-observer/.clawhubignore",
+        "skills/gong/.clawhubignore"
+      ],
+      "acceptance_criteria": [
+        "Exact source commit and path are supplied by a dry-run-capable publishing workflow",
+        "Exactly ten maintained release candidates and the approval-only sysadmin deprecation plan are in a schema-versioned manifest",
+        "Validation is the default, dry-run preview precedes publication on the same exact SHA, and no hide, delete, rename, merge, transfer, or migration command is present",
+        "Every release package excludes tests, Python caches, compiled Python, and stale local ClawHub metadata"
+      ],
+      "validation": ["./scripts/validate-skills.sh", "release-manifest validation", "git diff --check"]
+    },
+    {
+      "id": "AS-T12",
+      "name": "Final critic and release gate",
+      "owner_role": "critic-reviewer",
+      "depends_on": ["AS-T11"],
+      "write_scope": [],
+      "acceptance_criteria": [
+        "All findings are closed or marked as release blockers",
+        "Tests and package scans are green",
+        "Merge and registry mutations remain unexecuted"
+      ],
+      "validation": ["full repository validation", "ClawHub local scan or dry-run where available", "git status --short"]
+    }
+  ],
+  "waves": [
+    {"id": "AS-W0", "task_ids": ["AS-T1"]},
+    {"id": "AS-W1", "task_ids": ["AS-T2", "AS-T3", "AS-T4"]},
+    {"id": "AS-W2", "task_ids": ["AS-T5", "AS-T6", "AS-T7"]},
+    {"id": "AS-W3", "task_ids": ["AS-T8", "AS-T9", "AS-T10"]},
+    {"id": "AS-W4", "task_ids": ["AS-T11"]},
+    {"id": "AS-W5", "task_ids": ["AS-T12"]}
+  ]
+}

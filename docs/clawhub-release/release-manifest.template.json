@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "release_batch": {
+    "id": "agent-skills-clawhub-refresh-2026-08-29",
+    "default_mode": "validate",
+    "publisher": "jdrhyne"
+  },
+  "cli": {
+    "package": "clawhub",
+    "version": "0.23.3",
+    "command": ["clawhub", "skill", "publish"]
+  },
+  "source": {
+    "repository": "jdrhyne/agent-skills",
+    "commit": "__EXACT_GITHUB_SHA__",
+    "ref": "__EXACT_GITHUB_REF__"
+  },
+  "gates": {
+    "required_publish_ref": "refs/heads/main",
+    "required_environment": "clawhub-production",
+    "release_enabled_variable": "CLAWHUB_RELEASE_ENABLED",
+    "release_enabled_value": "true",
+    "environment_reviewers_configured_externally": true,
+    "publish_confirmation_template": "PUBLISH 10 CLAWHUB SKILLS FROM {sha}",
+    "expected_commit_must_match": true,
+    "dry_run_before_publish": true,
+    "slug_migration_enabled": false
+  },
+  "releases": [
+    {
+      "slug": "google-ads",
+      "name": "Google Ads",
+      "version": "1.2.0",
+      "source_path": "skills/google-ads",
+      "changelog": "Harden read-only analysis, browser and API routing, goal-aware recommendations, credential handling, and bounded approval-gated mutations.",
+      "tags": ["latest"],
+      "categories": ["integrations", "automation", "productivity"],
+      "topics": ["google-ads", "advertising", "campaign-analysis", "paid-search"]
+    },
+    {
+      "slug": "jira",
+      "name": "Jira",
+      "version": "1.4.0",
+      "source_path": "skills/jira",
+      "changelog": "Harden capability discovery, issue identity and scope, credential handling, and bounded approval-gated writes.",
+      "tags": ["latest"],
+      "categories": ["integrations", "productivity", "operations"],
+      "topics": ["jira", "issue-tracking", "project-management", "agile"]
+    },
+    {
+      "slug": "context-recovery",
+      "name": "Context Recovery",
+      "version": "1.3.0",
+      "source_path": "skills/context-recovery",
+      "changelog": "Constrain activation and recovery scope, treat recovered material as untrusted, surface provenance and conflicts, and gate cross-source actions and persistence.",
+      "tags": ["latest"],
+      "categories": ["productivity", "knowledge", "agents"],
+      "topics": ["context-recovery", "conversation-history", "provenance", "continuity"]
+    },
+    {
+      "slug": "nudocs",
+      "name": "Nudocs",
+      "version": "1.3.0",
+      "source_path": "skills/nudocs",
+      "changelog": "Harden credential setup, exact document identity, and explicit upload, sharing, export, and deletion authority boundaries.",
+      "tags": ["latest"],
+      "categories": ["integrations", "productivity", "communication"],
+      "topics": ["nudocs", "documents", "collaboration", "document-editing"]
+    },
+    {
+      "slug": "nutrient-openclaw",
+      "name": "Nutrient OpenClaw",
+      "version": "1.3.0",
+      "source_path": "skills/nutrient-openclaw",
+      "changelog": "Pin the plugin contract, use canonical metadata and portable paths, and require bounded estimates and confirmation for every credit-consuming DWS run.",
+      "tags": ["latest"],
+      "categories": ["integrations", "automation", "productivity"],
+      "topics": ["nutrient", "document-processing", "pdf", "ocr", "redaction"]
+    },
+    {
+      "slug": "todo-tracker",
+      "name": "Todo Tracker",
+      "version": "1.1.0",
+      "source_path": "clawdbot/todo-tracker",
+      "changelog": "Make task storage portable with monotonic stable IDs, literal matching, locked atomic writes, recoverable backups, and opt-in count-only heartbeats.",
+      "tags": ["latest"],
+      "categories": ["productivity", "automation"],
+      "topics": ["todo", "task-tracking", "markdown", "local-first"]
+    },
+    {
+      "slug": "gsc",
+      "name": "Google Search Console",
+      "version": "1.3.0",
+      "source_path": "skills/gsc",
+      "changelog": "Modernize read-only OAuth, pagination, retries, validation, freshness metadata, bounded queries, exports, and credential safety.",
+      "tags": ["latest"],
+      "categories": ["integrations", "research", "productivity"],
+      "topics": ["search-console", "seo", "search-analytics", "url-inspection"]
+    },
+    {
+      "slug": "ga4",
+      "name": "Google Analytics 4",
+      "version": "1.3.0",
+      "source_path": "skills/ga4",
+      "changelog": "Modernize read-only reporting, OAuth, pagination, retries, validation, key-event terminology, quota visibility, and safe CSV output.",
+      "tags": ["latest"],
+      "categories": ["integrations", "research", "productivity"],
+      "topics": ["google-analytics", "analytics", "reporting", "key-events"]
+    },
+    {
+      "slug": "munger-observer",
+      "name": "Munger Observer",
+      "version": "1.1.0",
+      "source_path": "prompts/munger-observer",
+      "changelog": "Rebuild decision review around bounded evidence, counterevidence, uncertainty, alternatives, privacy, and user-verifiable checks.",
+      "tags": ["latest"],
+      "categories": ["productivity", "knowledge"],
+      "topics": ["decision-review", "mental-models", "evidence", "premortem"]
+    },
+    {
+      "slug": "gong",
+      "name": "Gong",
+      "version": "1.2.0",
+      "source_path": "skills/gong",
+      "changelog": "Prevent credential leakage, bound pagination and transcript output, handle missing or malformed resources, and clean temporary API state.",
+      "tags": ["latest"],
+      "categories": ["integrations", "communication", "productivity"],
+      "topics": ["gong", "conversation-intelligence", "transcripts", "sales-analytics"]
+    }
+  ],
+  "deprecations": [
+    {
+      "slug": "sysadmin-toolbox",
+      "published_version": "1.1.0",
+      "plan": "approval-only-deprecation-or-hide",
+      "executable_registry_action": false,
+      "replacement_in_this_batch": false
+    }
+  ],
+  "prohibited_without_separate_approval": [
+    "ClawHub migration",
+    "ClawHub rename",
+    "ClawHub merge",
+    "ClawHub hide",
+    "ClawHub delete",
+    "ClawHub transfer"
+  ]
+}

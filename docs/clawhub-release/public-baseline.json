@@ -1,0 +1,123 @@
+{
+  "captured_at": "2026-08-29",
+  "publisher": "jdrhyne",
+  "source_repository": "jdrhyne/agent-skills",
+  "source_commit": "a4d31ad11998a8900bf801ec0daa27ee5cb1a834",
+  "notes": [
+    "Verification was refreshed with ClawHub CLI 0.23.3.",
+    "Registry visibility, publication, rename, merge, transfer, and deletion are not authorized by this manifest.",
+    "Unsigned is informational; unavailable provenance is a release-quality gap to fix on the next publication."
+  ],
+  "skills": [
+    {
+      "slug": "google-ads",
+      "version": "1.1.0",
+      "verification": "fail",
+      "security": "suspicious",
+      "source_path": "skills/google-ads",
+      "source_tree": "8c232974a88b77a61c7c6ab5864fcf8d5f04517b",
+      "release_action": "publish-fixed-version"
+    },
+    {
+      "slug": "sysadmin-toolbox",
+      "version": "1.1.0",
+      "verification": "fail",
+      "security": "suspicious",
+      "source_path": null,
+      "source_tree": null,
+      "release_action": "approval-gated-hide-and-deprecate"
+    },
+    {
+      "slug": "context-recovery",
+      "version": "1.2.2",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/context-recovery",
+      "source_tree": "c322585c01b0ad649f0be6b7b14c4e90fb440c34",
+      "release_action": "publish-hardened-version"
+    },
+    {
+      "slug": "nudocs",
+      "version": "1.2.0",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/nudocs",
+      "source_tree": "b09f2b9ce3cb21a906576510a375a36c24f3784a",
+      "release_action": "publish-hardened-version"
+    },
+    {
+      "slug": "nutrient-openclaw",
+      "version": "1.2.5",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/nutrient-openclaw",
+      "source_tree": "d6f38c6cd6e2bc491dbd7d34550e2e9fef201ce1",
+      "release_action": "publish-hardened-version"
+    },
+    {
+      "slug": "jira",
+      "version": "1.3.3",
+      "verification": "fail",
+      "security": "suspicious",
+      "source_path": "skills/jira",
+      "source_tree": "e9292d72bb6abd64c46cd4e474c5ca9927d4f6b1",
+      "release_action": "publish-fixed-version"
+    },
+    {
+      "slug": "todo-tracker",
+      "version": "1.0.0",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "clawdbot/todo-tracker",
+      "source_tree": "3ae30d165f5548530abbf219236d773ef0f54187",
+      "release_action": "publish-hardened-version"
+    },
+    {
+      "slug": "gsc",
+      "version": "1.2.2",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/gsc",
+      "source_tree": "64edfe546120a9f4d60824c6aa88ab9d315e80a7",
+      "release_action": "publish-modernized-version"
+    },
+    {
+      "slug": "ga4",
+      "version": "1.2.2",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/ga4",
+      "source_tree": "a3f5497d94a13b21b152330ebd4316f55fbd0943",
+      "release_action": "publish-modernized-version"
+    },
+    {
+      "slug": "munger-observer",
+      "version": "1.0.0",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "prompts/munger-observer",
+      "source_tree": "fdfff308c9a61952da6290128100fbff04832d2d",
+      "release_action": "publish-hardened-version"
+    },
+    {
+      "slug": "gong",
+      "version": "1.1.0",
+      "verification": "pass",
+      "security": "clean",
+      "source_path": "skills/gong",
+      "source_tree": "66916ea53a79fdb62f5c07d8ea44c8442391e5c4",
+      "release_action": "publish-hardened-version"
+    }
+  ],
+  "external_replacement": {
+    "slug": "nutrient-document-processing-universal",
+    "version": "1.1.2",
+    "verification": "pass",
+    "security": "clean",
+    "source_repository": "PSPDFKit-labs/nutrient-agent-skill",
+    "source_commit": "4d150575a5bb852306a9b72c78a97a62557651ed",
+    "source_path": "nutrient-document-processing",
+    "source_tree": "7b96c6bc54b7977d7f79a46d63a67f110d963aaf",
+    "release_action": "replace-with-corrected-canonical-package"
+  }
+}

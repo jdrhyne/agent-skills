@@ -1,0 +1,221 @@
+name: ClawHub ten-skill release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Validate only, preview all ten skills, or publish after every gate
+        required: true
+        default: validate
+        type: choice
+        options:
+          - validate
+          - dry-run
+          - publish
+      expected_source_commit:
+        description: Full 40-character commit expected to be published (required for publish)
+        required: false
+        type: string
+      publish_confirmation:
+        description: Exact SHA-bound batch confirmation from the release guide (required for publish)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clawhub-agent-skills-release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact workflow commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pinned Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.7"
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.16.0"
+
+      - name: Install pinned validation tools
+        run: |
+          python -m pip install --disable-pip-version-check PyYAML==6.0.2
+          npm install --global clawhub@0.23.3
+
+      - name: Verify source and CLI provenance
+        env:
+          EXPECTED_REPOSITORY: jdrhyne/agent-skills
+          EXPECTED_CLAWHUB_VERSION: 0.23.3
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "$EXPECTED_REPOSITORY"
+          test "$(clawhub --cli-version)" = "$EXPECTED_CLAWHUB_VERSION"
+
+      - name: Run offline release validation
+        run: |
+          set -euo pipefail
+          python scripts/clawhub_release.py validate
+          python -m unittest discover -s scripts/tests -p 'test_clawhub_release.py' -v
+          ./scripts/validate-skills.sh
+
+      - name: Render exact release manifest
+        run: |
+          python scripts/clawhub_release.py render \
+            --commit "$GITHUB_SHA" \
+            --ref "$GITHUB_REF" \
+            --output "$RUNNER_TEMP/clawhub-release-manifest.json"
+
+      - name: Upload release provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: clawhub-release-provenance-${{ github.sha }}
+          path: ${{ runner.temp }}/clawhub-release-manifest.json
+          if-no-files-found: error
+
+  preview:
+    if: inputs.mode == 'dry-run' || inputs.mode == 'publish'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact workflow commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.16.0"
+
+      - name: Install pinned ClawHub CLI
+        run: npm install --global clawhub@0.23.3
+
+      - name: Verify preview provenance
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "jdrhyne/agent-skills"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(clawhub --cli-version)" = "0.23.3"
+
+      - name: Preview exact ten-skill batch
+        run: |
+          set -euo pipefail
+          clawhub --no-input skill publish skills/google-ads --slug google-ads --name "Google Ads" --owner jdrhyne --version 1.2.0 --changelog "Harden read-only analysis, browser and API routing, goal-aware recommendations, credential handling, and bounded approval-gated mutations." --tags latest --categories integrations,automation,productivity --topics google-ads,advertising,campaign-analysis,paid-search --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/google-ads --dry-run --json
+          clawhub --no-input skill publish skills/jira --slug jira --name "Jira" --owner jdrhyne --version 1.4.0 --changelog "Harden capability discovery, issue identity and scope, credential handling, and bounded approval-gated writes." --tags latest --categories integrations,productivity,operations --topics jira,issue-tracking,project-management,agile --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/jira --dry-run --json
+          clawhub --no-input skill publish skills/context-recovery --slug context-recovery --name "Context Recovery" --owner jdrhyne --version 1.3.0 --changelog "Constrain activation and recovery scope, treat recovered material as untrusted, surface provenance and conflicts, and gate cross-source actions and persistence." --tags latest --categories productivity,knowledge,agents --topics context-recovery,conversation-history,provenance,continuity --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/context-recovery --dry-run --json
+          clawhub --no-input skill publish skills/nudocs --slug nudocs --name "Nudocs" --owner jdrhyne --version 1.3.0 --changelog "Harden credential setup, exact document identity, and explicit upload, sharing, export, and deletion authority boundaries." --tags latest --categories integrations,productivity,communication --topics nudocs,documents,collaboration,document-editing --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/nudocs --dry-run --json
+          clawhub --no-input skill publish skills/nutrient-openclaw --slug nutrient-openclaw --name "Nutrient OpenClaw" --owner jdrhyne --version 1.3.0 --changelog "Pin the plugin contract, use canonical metadata and portable paths, and require bounded estimates and confirmation for every credit-consuming DWS run." --tags latest --categories integrations,automation,productivity --topics nutrient,document-processing,pdf,ocr,redaction --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/nutrient-openclaw --dry-run --json
+          clawhub --no-input skill publish clawdbot/todo-tracker --slug todo-tracker --name "Todo Tracker" --owner jdrhyne --version 1.1.0 --changelog "Make task storage portable with monotonic stable IDs, literal matching, locked atomic writes, recoverable backups, and opt-in count-only heartbeats." --tags latest --categories productivity,automation --topics todo,task-tracking,markdown,local-first --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path clawdbot/todo-tracker --dry-run --json
+          clawhub --no-input skill publish skills/gsc --slug gsc --name "Google Search Console" --owner jdrhyne --version 1.3.0 --changelog "Modernize read-only OAuth, pagination, retries, validation, freshness metadata, bounded queries, exports, and credential safety." --tags latest --categories integrations,research,productivity --topics search-console,seo,search-analytics,url-inspection --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/gsc --dry-run --json
+          clawhub --no-input skill publish skills/ga4 --slug ga4 --name "Google Analytics 4" --owner jdrhyne --version 1.3.0 --changelog "Modernize read-only reporting, OAuth, pagination, retries, validation, key-event terminology, quota visibility, and safe CSV output." --tags latest --categories integrations,research,productivity --topics google-analytics,analytics,reporting,key-events --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/ga4 --dry-run --json
+          clawhub --no-input skill publish prompts/munger-observer --slug munger-observer --name "Munger Observer" --owner jdrhyne --version 1.1.0 --changelog "Rebuild decision review around bounded evidence, counterevidence, uncertainty, alternatives, privacy, and user-verifiable checks." --tags latest --categories productivity,knowledge --topics decision-review,mental-models,evidence,premortem --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path prompts/munger-observer --dry-run --json
+          clawhub --no-input skill publish skills/gong --slug gong --name "Gong" --owner jdrhyne --version 1.2.0 --changelog "Prevent credential leakage, bound pagination and transcript output, handle missing or malformed resources, and clean temporary API state." --tags latest --categories integrations,communication,productivity --topics gong,conversation-intelligence,transcripts,sales-analytics --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/gong --dry-run --json
+
+  publish:
+    if: inputs.mode == 'publish'
+    needs: preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: clawhub-production
+    steps:
+      - name: Check out the exact workflow commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.16.0"
+
+      - name: Install pinned ClawHub CLI
+        run: npm install --global clawhub@0.23.3
+
+      - name: Enforce human publication gates
+        env:
+          EXPECTED_SOURCE_COMMIT: ${{ inputs.expected_source_commit }}
+          PUBLISH_CONFIRMATION: ${{ inputs.publish_confirmation }}
+          REQUIRED_CONFIRMATION_PREFIX: PUBLISH 10 CLAWHUB SKILLS FROM
+          CLAWHUB_RELEASE_ENABLED: ${{ vars.CLAWHUB_RELEASE_ENABLED }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_REPOSITORY" = "jdrhyne/agent-skills"
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$EXPECTED_SOURCE_COMMIT" = "$GITHUB_SHA"
+          test "$PUBLISH_CONFIRMATION" = "$REQUIRED_CONFIRMATION_PREFIX $GITHUB_SHA"
+          test "$CLAWHUB_RELEASE_ENABLED" = "true"
+          test "$(clawhub --cli-version)" = "0.23.3"
+
+      - name: Create owner-only ClawHub auth config
+        env:
+          CLAWHUB_PUBLISH_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_CONFIG_PATH: ${{ runner.temp }}/clawhub/config.json
+        run: |
+          set -euo pipefail
+          test -n "$CLAWHUB_PUBLISH_TOKEN"
+          umask 077
+          mkdir -p "$(dirname "$CLAWHUB_CONFIG_PATH")"
+          chmod 700 "$(dirname "$CLAWHUB_CONFIG_PATH")"
+          node -e '
+            const fs = require("node:fs");
+            const token = process.env.CLAWHUB_PUBLISH_TOKEN;
+            const configPath = process.env.CLAWHUB_CONFIG_PATH;
+            if (!token || !configPath) process.exit(1);
+            fs.writeFileSync(
+              configPath,
+              `${JSON.stringify({ registry: "https://clawhub.ai", token }, null, 2)}\n`,
+              { encoding: "utf8", mode: 0o600, flag: "wx" },
+            );
+            fs.chmodSync(configPath, 0o600);
+          '
+          test "$(stat -c '%a' "$CLAWHUB_CONFIG_PATH")" = "600"
+
+      - name: Verify ClawHub authentication
+        env:
+          CLAWHUB_CONFIG_PATH: ${{ runner.temp }}/clawhub/config.json
+        run: clawhub --no-input whoami
+
+      - name: Publish exact ten-skill batch
+        env:
+          CLAWHUB_CONFIG_PATH: ${{ runner.temp }}/clawhub/config.json
+        run: |
+          set -euo pipefail
+          clawhub --no-input skill publish skills/google-ads --slug google-ads --name "Google Ads" --owner jdrhyne --version 1.2.0 --changelog "Harden read-only analysis, browser and API routing, goal-aware recommendations, credential handling, and bounded approval-gated mutations." --tags latest --categories integrations,automation,productivity --topics google-ads,advertising,campaign-analysis,paid-search --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/google-ads --json
+          clawhub --no-input skill publish skills/jira --slug jira --name "Jira" --owner jdrhyne --version 1.4.0 --changelog "Harden capability discovery, issue identity and scope, credential handling, and bounded approval-gated writes." --tags latest --categories integrations,productivity,operations --topics jira,issue-tracking,project-management,agile --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/jira --json
+          clawhub --no-input skill publish skills/context-recovery --slug context-recovery --name "Context Recovery" --owner jdrhyne --version 1.3.0 --changelog "Constrain activation and recovery scope, treat recovered material as untrusted, surface provenance and conflicts, and gate cross-source actions and persistence." --tags latest --categories productivity,knowledge,agents --topics context-recovery,conversation-history,provenance,continuity --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/context-recovery --json
+          clawhub --no-input skill publish skills/nudocs --slug nudocs --name "Nudocs" --owner jdrhyne --version 1.3.0 --changelog "Harden credential setup, exact document identity, and explicit upload, sharing, export, and deletion authority boundaries." --tags latest --categories integrations,productivity,communication --topics nudocs,documents,collaboration,document-editing --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/nudocs --json
+          clawhub --no-input skill publish skills/nutrient-openclaw --slug nutrient-openclaw --name "Nutrient OpenClaw" --owner jdrhyne --version 1.3.0 --changelog "Pin the plugin contract, use canonical metadata and portable paths, and require bounded estimates and confirmation for every credit-consuming DWS run." --tags latest --categories integrations,automation,productivity --topics nutrient,document-processing,pdf,ocr,redaction --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/nutrient-openclaw --json
+          clawhub --no-input skill publish clawdbot/todo-tracker --slug todo-tracker --name "Todo Tracker" --owner jdrhyne --version 1.1.0 --changelog "Make task storage portable with monotonic stable IDs, literal matching, locked atomic writes, recoverable backups, and opt-in count-only heartbeats." --tags latest --categories productivity,automation --topics todo,task-tracking,markdown,local-first --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path clawdbot/todo-tracker --json
+          clawhub --no-input skill publish skills/gsc --slug gsc --name "Google Search Console" --owner jdrhyne --version 1.3.0 --changelog "Modernize read-only OAuth, pagination, retries, validation, freshness metadata, bounded queries, exports, and credential safety." --tags latest --categories integrations,research,productivity --topics search-console,seo,search-analytics,url-inspection --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/gsc --json
+          clawhub --no-input skill publish skills/ga4 --slug ga4 --name "Google Analytics 4" --owner jdrhyne --version 1.3.0 --changelog "Modernize read-only reporting, OAuth, pagination, retries, validation, key-event terminology, quota visibility, and safe CSV output." --tags latest --categories integrations,research,productivity --topics google-analytics,analytics,reporting,key-events --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/ga4 --json
+          clawhub --no-input skill publish prompts/munger-observer --slug munger-observer --name "Munger Observer" --owner jdrhyne --version 1.1.0 --changelog "Rebuild decision review around bounded evidence, counterevidence, uncertainty, alternatives, privacy, and user-verifiable checks." --tags latest --categories productivity,knowledge --topics decision-review,mental-models,evidence,premortem --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path prompts/munger-observer --json
+          clawhub --no-input skill publish skills/gong --slug gong --name "Gong" --owner jdrhyne --version 1.2.0 --changelog "Prevent credential leakage, bound pagination and transcript output, handle missing or malformed resources, and clean temporary API state." --tags latest --categories integrations,communication,productivity --topics gong,conversation-intelligence,transcripts,sales-analytics --source-repo jdrhyne/agent-skills --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF" --source-path skills/gong --json
+
+      - name: Remove temporary ClawHub auth config
+        if: always()
+        env:
+          CLAWHUB_CONFIG_PATH: ${{ runner.temp }}/clawhub/config.json
+        run: |
+          set -euo pipefail
+          rm -f -- "$CLAWHUB_CONFIG_PATH"
+          rmdir -- "$(dirname "$CLAWHUB_CONFIG_PATH")" 2>/dev/null || true
