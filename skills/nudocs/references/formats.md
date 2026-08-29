@@ -1,182 +1,41 @@
-# Nudocs Format Reference
+# Nudocs CLI formats
 
-Supported document formats for upload (input) and download/export (output).
+Read this reference only for an upload or export whose format is not already explicit.
 
----
+The maintained `@nutrient-sdk/nudocs-cli` documentation currently lists these formats:
 
-## Input Formats (Upload)
+## Upload
 
-| Format | Extensions | Notes |
-|--------|------------|-------|
-| Markdown | `.md` | Full CommonMark + GFM tables, footnotes |
-| HTML | `.html`, `.xhtml` | Inline styles preserved |
-| LaTeX | `.latex`, `.tex` | Math, bibliographies supported |
-| reStructuredText | `.rst` | Sphinx directives supported |
-| Org mode | `.org` | Emacs org-mode syntax |
-| Textile | `.textile` | Legacy markup format |
-| DocBook XML | `.xml`, `.dbk` | Technical documentation standard |
-| EPUB | `.epub` | E-book format (extracts content) |
-| MediaWiki | `.wiki` | Wikipedia-style markup |
-| Jupyter Notebook | `.ipynb` | Code cells + markdown cells |
-| OpenDocument | `.odt` | LibreOffice/OpenOffice native |
-| Microsoft Word | `.doc`, `.docx` | Full formatting support |
-| Rich Text | `.rtf` | Cross-platform rich text |
-| Plain Text | `.txt` | No formatting |
-| PDF | `.pdf` | Text extraction (formatting limited) |
+| Format | Extensions |
+|---|---|
+| Markdown | `.md` |
+| Microsoft Word | `.doc`, `.docx` |
+| PDF | `.pdf` |
+| HTML | `.html` |
+| Plain text | `.txt` |
+| OpenDocument | `.odt` |
+| Rich Text | `.rtf` |
+| EPUB | `.epub` |
+| LaTeX | `.tex`, `.latex` |
 
-### Input Format Details
+## Export
 
-**Best fidelity:** Markdown, HTML, LaTeX, DOCX, ODT
-**Limited fidelity:** PDF (layout-based, text extraction only)
+| Format | CLI value |
+|---|---|
+| Microsoft Word | `docx` (default) |
+| Markdown | `md` |
+| PDF | `pdf` |
+| HTML | `html` |
+| Plain text | `txt` |
 
----
+Confirm the installed version with `nudocs upload --help` or `nudocs pull --help` before rejecting a format or promising conversion fidelity. The service may change supported formats independently of this skill.
 
-## Output Formats (Download/Export)
-
-| Format | Extensions | Best For |
-|--------|------------|----------|
-| Markdown | `.md` | Version control, plain text editing |
-| HTML | `.html`, `.xhtml` | Web publishing, email |
-| LaTeX | `.latex`, `.tex` | Academic papers, typesetting |
-| PDF | `.pdf` | Final distribution, printing |
-| reStructuredText | `.rst` | Python docs, Sphinx projects |
-| Org mode | `.org` | Emacs users, literate programming |
-| Textile | `.textile` | Legacy systems |
-| DocBook XML | `.xml`, `.dbk` | Technical manuals |
-| EPUB | `.epub` | E-readers, digital books |
-| Microsoft Word | `.doc`, `.docx` | Business documents, collaboration |
-| OpenDocument | `.odt` | Open-source office suites |
-| Rich Text | `.rtf` | Cross-platform compatibility |
-| Plain Text | `.txt` | Maximum compatibility |
-| MediaWiki | `.wiki` | Wiki publishing |
-| AsciiDoc | `.adoc`, `.asciidoc` | Technical docs, O'Reilly books |
-| Jupyter Notebook | `.ipynb` | Data science, reproducible research |
-
----
-
-## Format Selection Guide
-
-### Quick Decision Matrix
-
-| Use Case | Recommended Format |
-|----------|-------------------|
-| Git/version control | Markdown |
-| Academic paper | LaTeX → PDF |
-| Business report | DOCX or PDF |
-| Web publishing | HTML |
-| E-book | EPUB |
-| Technical docs | AsciiDoc or RST |
-| Data science | Jupyter Notebook |
-| Universal sharing | PDF |
-| Editing collaboration | DOCX |
-
-### Markdown vs DOCX vs PDF
-
-| Aspect | Markdown | DOCX | PDF |
-|--------|----------|------|-----|
-| Editable | ✅ Plain text | ✅ Rich editor | ❌ Limited |
-| Version control | ✅ Excellent | ⚠️ Binary diffs | ❌ Binary |
-| Formatting | ⚠️ Basic | ✅ Rich | ✅ Preserved |
-| Collaboration | ✅ Git workflows | ✅ Track changes | ❌ Comments only |
-| Universal viewing | ⚠️ Needs render | ⚠️ Needs Word | ✅ Any device |
-| File size | ✅ Tiny | ⚠️ Medium | ⚠️ Medium-large |
-
-**Use Markdown when:** Source control matters, plain text preferred, technical docs
-**Use DOCX when:** Business collaboration, rich formatting needed, non-technical users
-**Use PDF when:** Final distribution, print-ready, legal/archival purposes
-
----
-
-## Round-Trip Considerations
-
-### What Survives Conversion
-
-| Feature | MD↔HTML | MD↔DOCX | DOCX↔PDF | LaTeX↔PDF |
-|---------|---------|---------|----------|-----------|
-| Headings | ✅ | ✅ | ✅ | ✅ |
-| Bold/Italic | ✅ | ✅ | ✅ | ✅ |
-| Lists | ✅ | ✅ | ✅ | ✅ |
-| Tables | ✅ | ✅ | ✅ | ✅ |
-| Images | ✅ | ✅ | ✅ | ✅ |
-| Links | ✅ | ✅ | ✅ | ✅ |
-| Footnotes | ✅ | ⚠️ | ✅ | ✅ |
-| Math equations | ⚠️ | ⚠️ | ✅ | ✅ |
-| Custom styles | ❌ | ⚠️ | ✅ | ✅ |
-| Page layout | ❌ | ⚠️ | ✅ | ✅ |
-| Comments | ❌ | ✅ | ❌ | ❌ |
-| Track changes | ❌ | ✅ | ❌ | ❌ |
-
-✅ = Preserved | ⚠️ = Partial/degraded | ❌ = Lost
-
-### Lossless Round-Trips
-
-These conversions preserve content reliably:
-- Markdown ↔ HTML ↔ Markdown
-- DOCX ↔ ODT ↔ DOCX
-- LaTeX → PDF (one-way, high fidelity)
-- Markdown → PDF (one-way)
-
-### Lossy Conversions (Avoid for Editing)
-
-- PDF → anything (layout information lost)
-- DOCX → Markdown (complex formatting stripped)
-- HTML with CSS → Markdown (styling lost)
-
----
-
-## Best Practices
-
-### For Technical Documentation
-```
-Source: Markdown or AsciiDoc
-Output: HTML (web), PDF (download)
-```
-
-### For Academic Writing
-```
-Source: LaTeX
-Output: PDF
-Collaboration: Overleaf or Git
-```
-
-### For Business Documents
-```
-Source: DOCX (if collaboration needed)
-Output: PDF (for distribution)
-```
-
-### For Publishing
-```
-Source: Markdown or DOCX
-Output: EPUB (e-books), HTML (web), PDF (print)
-```
-
----
-
-## gimme Format Examples
+Examples using the maintained CLI:
 
 ```bash
-# Upload with explicit format
-gimme up paper.tex --format latex
-
-# Download to specific format  
-gimme dl abc123 --format pdf
-gimme dl abc123 --format docx
-gimme dl abc123 --format epub
-
-# Convert between formats
-gimme dl abc123 --format md      # Get as Markdown
-gimme dl abc123 --format html    # Get as HTML
+nudocs upload report.md
+nudocs pull 01ABC123XYZ --format pdf --output report.pdf
+nudocs pull 01ABC123XYZ --format md --output report.md
 ```
 
-### Format Aliases
-
-| Alias | Resolves To |
-|-------|-------------|
-| `md` | `markdown` |
-| `tex` | `latex` |
-| `word` | `docx` |
-| `odf` | `odt` |
-| `ascii` | `asciidoc` |
-| `rst` | `rst` |
-| `notebook` | `ipynb` |
+Resolve the exact output path first and do not overwrite an existing file without confirmation. Format conversion can lose layout, comments, or other features; do not promise lossless round trips unless the current service documents them.
