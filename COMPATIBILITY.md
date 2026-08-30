@@ -63,6 +63,7 @@ These skills require OpenClaw-specific tools:
 | `self-improving-agent` | `clawdbot/self-improving-agent` | `read`, `write` | Portable tools but OpenClaw-oriented |
 | `skill-sync` | `clawdbot/skill-sync` | `exec` | Portable tools but OpenClaw-oriented |
 | `todo-tracker` | `clawdbot/todo-tracker` | `exec` | Portable tools but OpenClaw-oriented |
+| `tweetclaw` | `skills/tweetclaw` | `explore`, `tweetclaw` | Requires the TweetClaw OpenClaw plugin |
 
 ## Tool Categories
 
