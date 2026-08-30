@@ -82,13 +82,13 @@ agent-skills/
 
 ## Compatibility
 
-**79% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
+**76% of skills work across all platforms** (OpenClaw, Claude Code, Codex).
 
 | Category | Count | Platforms |
 |----------|-------|-----------|
 | Universal | 8 | ✅ All |
 | Portable | 18 | ✅ All (uses read/write/exec) |
-| OpenClaw-only | 7 | OpenClaw only |
+| OpenClaw-only | 8 | OpenClaw only |
 
 See **[COMPATIBILITY.md](./COMPATIBILITY.md)** for the full matrix and installation instructions per platform.
 
@@ -120,6 +120,7 @@ Skills include tooling, templates, scripts, or structured workflows:
 | [`remotion`](skills/remotion/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--remotion--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Best practices for Remotion video creation in React — compositions, sequences, animation, timing, and rendering. |
 | [`salesforce`](skills/salesforce/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--salesforce--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Query and manage Salesforce CRM data via the Salesforce CLI (`sf`). |
 | [`task-orchestrator`](skills/task-orchestrator/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--task-orchestrator--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Autonomous multi-agent task orchestration with dependency analysis, parallel tmux/Codex execution, and self-healing heartbeat monitoring. |
+| [`tweetclaw`](skills/tweetclaw/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--tweetclaw--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Use TweetClaw in OpenClaw for Twitter search, follower exports, monitoring, media, and approved X/Twitter automation through Xquik. |
 | [`zendesk`](skills/zendesk/) | <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fjdrhyne.github.io%2Fagent-skills%2Fskills%2Fskills--zendesk--SKILL.md.json&label=&style=for-the-badge&v=20260314-3" width="200"> | Manage Zendesk tickets, users, and support workflows through the Zendesk API. |
 <!-- GENERATED_SKILLS_TABLE_END -->
 

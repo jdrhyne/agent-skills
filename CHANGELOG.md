@@ -4,6 +4,7 @@
 
 ### Added
 
+- feat(skills): add a tested TweetClaw workflow for bounded X research and approval-gated account actions.
 - feat(release): add a schema-versioned ten-skill ClawHub manifest with exact source provenance and bounded catalog metadata.
 - feat(release): add manual validation, dry-run preview, and independently gated production publication jobs.
 - test(release): add fail-closed structural, token-level, authentication-config, and adversarial release regression coverage.
